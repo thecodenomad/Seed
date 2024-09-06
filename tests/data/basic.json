@@ -1,0 +1,36 @@
+{
+    "character1": {
+        "soldier": {
+            "next_fib": 13,
+            "descriptions": [
+                "blonde",
+                "young",
+                "27 years old",
+                "Blonde hair, and blue eyes",
+                "Fought against the Nazis in the early 40s",
+                "<get juices flowing, requires logical processing to force certain number of word causing logical thinking of the situation or person with respect to the main prompt, 'soldier'">
+            ]
+        },
+        "engineer": {
+            "next_fib": 3,
+            "descriptions": [
+                "electrical",
+                "computers",
+                "auotomation engineer"
+            ]
+        }
+    },
+    "setting1": {
+        "soldiers": {
+            "next_fib": 1,
+            "descriptions": []
+        },
+        "mountains": {
+            "next_fib": 1,
+            "descriptions": []
+        }
+    },
+    "character2": {},
+    "setting2": {},
+    "character3": {}
+}
