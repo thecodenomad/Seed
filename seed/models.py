@@ -1,6 +1,6 @@
 from seed import common, errors
 from pydantic import BaseModel
-from typing import Dict, List
+from typing import Dict, List, Set
 
 # TODO: Abstract away the calculation aspect so others can modify
 # the mechanism with how a particular asset is LeveledUp. The initial idea
@@ -28,7 +28,6 @@ class Descriptor(BaseModel):
     name: str
     next_fib: int = 0
     descriptions: List[str] = []
-
     # TODO: Should Level Up be something done at the descriptor level?
     # level_up: bool = False
 
@@ -36,34 +35,45 @@ class Descriptor(BaseModel):
     # For school should have grades, grades should have students, etc
     # A school can also have engineers, teachers, principles
     # This should be shared descriptor assets that can belong to an asset
-    shared_to: List[str] = []
+    asset_links: Set[str] = set()
 
     def add_description(self, description):
 
         num_words = common.get_num_words(description)
+        next_fib = common.get_next_fibonacci(self.next_fib)
+
+        # This should satisfy entries with 1 word
+        if len(self.descriptions) == 2:
+            next_fib = 2
 
         # If the description length equals the next fibonacci sequence, add it
         # else fail. No level up here, descriptions must always be a fibonacci number
         # For descriptions, this is the way.
-        if num_words != self.next_fib:
+        if num_words != next_fib:
+            print("In conditional num_words ! =next_fib")
             msg = f"Required {self.next_fib} length for the description"
             raise errors.FailedDescriptionLength(msg)
 
         # Add the description to the hash tag
-        self.descriptions.append(description)
+        print("Adding description in descriptor")
+        self.descriptions.append(description.lower())
 
         # Set the next description length
-        self.next_fib = common.get_next_fibonacci(self.next_fib)
+        self.next_fib = next_fib
 
-    def is_shared(self):
-        return len(self.shared_to) > 0
+    def is_dangling(self):
+        """Determines if this descriptor doesn't belong to an asset"""
+        return len(self.asset_links) == 0
 
-    def share_with(self, asset_name):
-        self.shared_to.append(asset_name)
+    def is_multi_asset_linked(self):
+        """Determines if this descriptor belongs to multiple assets"""
+        return len(self.asset_links) > 1
 
-    # TODO: Prefer to get O(1)
-    def remove_share(self, asset_name):
-         self.shared_to = [i for i in self.shared_to if i.lower() != asset_name.lower()]
+    def link_asset(self, asset_name):
+        self.asset_links.add(asset_name.lower())
+
+    def remove_link(self, asset_name):
+         self.asset_links = set([i for _,i in enumerate(self.asset_links) if i.lower() != asset_name.lower()])
 
 
 # An Asset in the context of this application is a singular object or place
@@ -90,7 +100,7 @@ class Asset(BaseModel):
 
     @property
     def hashtags(self):
-        return self.descriptors.keys()
+        return list(self.descriptors.keys())
 
     def add_description(self, hashtag, description):
 
@@ -99,19 +109,21 @@ class Asset(BaseModel):
             self.descriptors[hashtag].add_description(description)
         else:
             # Create new descriptor
-            descriptor = Descriptor(name=hashtag, next_fib=1)
+            descriptor = Descriptor(name=hashtag, next_fib=0)
+
             # Must still pass the validation
             descriptor.add_description(description)
+            self.descriptors[hashtag] = descriptor
 
         # Level Up occurs only when the number of descriptors match the
         # next_fib value. The LevelUp attribute is used to quickly determine
         # which assets are considered incomplete to prioritize prompts to/from
         # the AI model.
         num_hashtags = len(self.descriptors)
+        print(f"num_hastags: {num_hashtags}")
         if num_hashtags == self.next_fib:
             self.level_up = True
             self.next_fib = common.get_next_fibonacci(self.next_fib)
-            print(f"Level Up achieved, next Fibonacci set to: {self.next_fib}")
         else:
             self.level_up = False
 
@@ -119,5 +131,5 @@ class Asset(BaseModel):
     def has_asset_relation(self):
         """ Determines if an asset relates to another asset via a shared descriptor """
 
-        self.shared_descriptors = [name for name, o in self.descriptors.items() if o.is_shared()]
+        self.shared_descriptors = [name for name, o in self.descriptors.items() if o.is_multi_asset_linked()]
         return len(self.shared_descriptors) > 0

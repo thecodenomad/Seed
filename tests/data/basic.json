@@ -1,4 +1,44 @@
 {
+    "global_descriptors": {
+        "desc1": {
+            "name": "desc1",
+            "next_fib": 1,
+            "shared_to": [],
+            "descriptions": ["red"]
+        },
+        "desc2": {
+            "name": "desc2",
+            "next_fib": 1,
+            "shared_to": [],
+            "descriptions": ["white"]
+        },
+        "desc3": {
+            "name": "desc3",
+            "next_fib": 1,
+            "shared_to": [],
+            "descriptions": ["blue flag"]       
+        }
+    },
+    "global_assets": {
+
+        "character1": {
+            "name": "character1",
+            "next_fib": 1,
+            "descriptors": []
+        },
+        "setting1": {
+            "name": "setting1",
+            "descriptors": []
+        }
+        
+    }
+}
+
+
+
+
+
+{
     "character1": {
         "soldier": {
             "next_fib": 13,

@@ -4,7 +4,7 @@ import pytest
 
 test_folder = os.path.dirname(os.path.abspath(__file__))
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def basic_json():
     json_file_path = f"{test_folder}/data/basic.json"
 
@@ -12,7 +12,7 @@ def basic_json():
     with open(json_file_path, 'r') as file:
         yield file.read()
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def basic_descriptor_json():
     json_file_path = f"{test_folder}/data/basic_descriptor.json"
 
@@ -20,7 +20,7 @@ def basic_descriptor_json():
     with open(json_file_path, 'r') as file:
         yield file.read()
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def basic_asset_json():
     json_file_path = f"{test_folder}/data/basic_asset.json"
 

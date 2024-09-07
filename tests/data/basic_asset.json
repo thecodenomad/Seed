@@ -1,4 +1,16 @@
 {
-    "name": "character1",
-    "descriptors": {}
+    "name": "character",
+    "descriptors": {
+        "desc1": {
+            "name": "desc1",
+            "next_fib": 0,
+            "descriptions": []
+        },
+        "desc2": {
+            "name": "desc2",
+            "next_fib": 0,
+            "descriptions": []
+        }
+    },
+    "next_fib": 3
 }
