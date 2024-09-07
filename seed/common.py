@@ -1,6 +1,11 @@
 #
 # This module is meant for helper functions
 #
+import re
+
+def get_num_words(description:str):
+    # Split by words
+    return len(re.split('\s+', description))
 
 def get_fibonacci(n):
     """
