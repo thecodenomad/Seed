@@ -82,7 +82,7 @@ class Descriptor(BaseModel):
 class Asset(BaseModel):
     name: str
     next_fib: int = 0
-    descriptors: Dict[str, Descriptor] = {}
+    descriptors: Set[str] = set()
 
     # This is used to determine when the number of descriptions matches the
     # 'next_fib' number qualifying it for growth. All non-levelup assets
@@ -92,28 +92,64 @@ class Asset(BaseModel):
     # weird...
     level_up: bool = False
 
-    # Lazy load
-    shared_descriptors: List[str] = []
-
     # TODO: add/remove hashtags
-    # TODO: add/remove descriptions from hashtags
+    def add_descriptor(self, descriptor_name):
+        self.descriptors.add(descriptor_name.lower())
+        if self.next_fib == len(self.descriptors):
+            self.level_up = True
+            self.next_fib = common.get_next_fibonacci(self.next_fib)
+
+    def remove_descriptor(self, descriptor_name):
+        self.level_up = False
+        self.descriptors.remove(descriptor_name.lower())
+        if self.next_fib <= len(self.descriptors):
+            self.next_fib = common.get_next_fibonacci(len(self.descriptors))
+
+    def is_uneven(self):
+        print(f"Uneven check: {len(self.descriptors)} != {self.next_fib}")
+        if len(self.descriptors) <= 3:
+            return common.get_fibonacci(len(self.descriptors)) != self.next_fib
+        return len(self.descriptors) != self.next_fib
 
     @property
     def hashtags(self):
-        return list(self.descriptors.keys())
+        return self.descriptors
 
-    def add_description(self, hashtag, description):
 
-        # Check to see if the hashtag exists in the descriptors
-        if self.descriptors.get(hashtag):
-            self.descriptors[hashtag].add_description(description)
+FIB_N_LEVEL = 1
+
+# This should be exportable into something consumable by an AI model / Pytorch
+class MainSeed(BaseModel):
+    """The Global Seed to be fed into an AI Model."""
+
+    global_descriptors: List[Descriptor] = []
+    global_desc_level_up: bool = False
+    global_desc_next_fib: int = FIB_N_LEVEL
+
+    global_assets: List[Asset] = []
+    global_assets_level_up: bool = False
+    global_assets_next_fib: int = FIB_N_LEVEL
+
+
+    def add_description_to_asset(self, asset_name, descriptor_name, description):
+
+        # Validate Asset
+
+
+        # Validate Descripts
+
+        # Check to see if the hashtag
+        if hashtag in self.descriptors:
+            self.global_descriptors[hashtag].add_description(description)
         else:
             # Create new descriptor
             descriptor = Descriptor(name=hashtag, next_fib=0)
 
             # Must still pass the validation
             descriptor.add_description(description)
-            self.descriptors[hashtag] = descriptor
+
+            # TODO: This should be an external method to update the global state
+            self.global_descriptors[hashtag] = descriptor
 
         # Level Up occurs only when the number of descriptors match the
         # next_fib value. The LevelUp attribute is used to quickly determine
@@ -130,6 +166,8 @@ class Asset(BaseModel):
     # TODO: Make more performant, maybe a map of some sort with a lazy load?
     def has_asset_relation(self):
         """ Determines if an asset relates to another asset via a shared descriptor """
+        for i in self.descriptors:
+            pass
 
-        self.shared_descriptors = [name for name, o in self.descriptors.items() if o.is_multi_asset_linked()]
+        self.shared_descriptors = [name for name in self.descriptors if o.is_multi_asset_linked()]
         return len(self.shared_descriptors) > 0

@@ -102,3 +102,25 @@ def get_next_fibonacci(n:int):
     # If b is greater than n, b is the next Fibonacci number
     else:
         return b
+
+
+def get_prev_fibonacci(n:int):
+    """Get the next number in the fibonacci sequence after n
+    Args:
+        n (int): The fibonacci number to start
+
+    Returns:
+        n (int): The next number in the fibonacci sequence after n
+    """
+    # Handle base cases
+    if n <= 1:
+        return 0
+
+    # Initialize the first two Fibonacci numbers
+    a, b = 0, 1
+    while b < n:
+        if b == n:
+            break
+        a, b = b, a + b
+
+    return a
