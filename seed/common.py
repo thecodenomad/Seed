@@ -119,8 +119,6 @@ def get_prev_fibonacci(n:int):
     # Initialize the first two Fibonacci numbers
     a, b = 0, 1
     while b < n:
-        if b == n:
-            break
         a, b = b, a + b
 
     return a

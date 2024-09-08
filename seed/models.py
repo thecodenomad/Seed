@@ -67,7 +67,6 @@ class Descriptor(BaseModel):
             self.level_up = True
             self.next_fib = common.get_next_fibonacci(self.next_fib)
 
-
     def is_dangling(self):
         """Determines if this descriptor doesn't belong to an asset"""
         return len(self.asset_links) == 0
@@ -185,11 +184,15 @@ class MainSeed(BaseModel):
             self.global_assets_level_up = True
 
     # TODO: Make more performant, maybe a map of some sort with a lazy load?
-    def asset_relations(self, sibling_asset:Asset):
+    def asset_relations(self, sibling_name:str):
         """Determines if an asset relates to another asset via a shared descriptor.
         Args:
             sibling_asset: The asset looking for siblings
         """
+        sibling_asset = self.global_assets.get(sibling_name)
+        if not sibling_asset:
+            raise errors.SeedException(f"Asset {sibling_name} doesn't exist.")
+
         relations = {}
         for asset_name, asset_obj in self.global_assets.items():
             # Skip the sibbling_asset that was passed in
@@ -199,6 +202,6 @@ class MainSeed(BaseModel):
             # All descriptors for this asset, see if one of those is in the asset to find relations
             for descriptor_name in asset_obj.descriptors:
                 if descriptor_name in sibling_asset.descriptors:
-                    relations[descriptor_name] = sibling_asset.name
+                    relations[descriptor_name] = asset_obj.name
 
         return relations

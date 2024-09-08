@@ -2,7 +2,7 @@ import json
 import pytest
 
 from pydantic_core import from_json
-from seed import errors
+from seed import errors, common
 from seed.models import Descriptor
 
 pytestmark = pytest.mark.descriptor
@@ -75,3 +75,14 @@ def test_validate_descriptions(basic_descriptor_dict:dict):
     with pytest.raises(errors.FailedDescriptionLength):
         # next_fib should be 3, so 2 word description is not allowed
         Descriptor.model_validate_json(json_obj)
+
+def test_adding_non_fib_length(basic_descriptor:Descriptor):
+
+    verify_next_fibs = [2,3,5,5,8,8,8]
+    descriptions = ["1","2","3","4","5","6","7"]
+    basic_descriptor.descriptions = []
+
+    for index, description in enumerate(descriptions):
+        next_fib = basic_descriptor.next_fib
+        basic_descriptor.add_description(description)
+        assert basic_descriptor.next_fib == verify_next_fibs[index]

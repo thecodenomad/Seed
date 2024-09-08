@@ -15,6 +15,7 @@ def test_get_next_fibonacci():
 
     # In this conext, n=1 would be recursive, so always
     # return 2.
+    assert common.get_next_fibonacci(0) == 1
     assert common.get_next_fibonacci(1) == 2
     assert common.get_next_fibonacci(2) == 3
     assert common.get_next_fibonacci(4) == 5
@@ -23,6 +24,7 @@ def test_get_next_fibonacci():
     assert common.get_next_fibonacci(30) == 34
 
 def test_get_prev_fibonacci():
+    assert common.get_prev_fibonacci(33) == 21
     assert common.get_prev_fibonacci(34) == 21
     assert common.get_prev_fibonacci(21) == 13
     assert common.get_prev_fibonacci(13) == 8
