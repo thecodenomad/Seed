@@ -24,8 +24,12 @@ venvPath = "."
 venv = ".venv"
 
 [tool.pytest.ini_options]
-addopts = "--cov=seed"
-markers = ["asset: Asset model tests", "descriptor: Descriptor model tests", "wip: work in progress tests"]
+addopts = "--cov=seed -s"
+markers = [
+    "asset: Asset model tests",
+    "descriptor: Descriptor model tests",
+    "wip: work in progress tests",
+]
 
 [tool.coverage.run]
 branch = true

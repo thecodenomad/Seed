@@ -18,7 +18,9 @@ def basic_descriptor_descriptions(basic_descriptor_dict):
 
 @pytest.fixture(scope="function")
 def basic_descriptor(basic_descriptor_json):
-    yield Descriptor.model_validate_json(basic_descriptor_json)
+    desc = Descriptor.model_validate_json(basic_descriptor_json)
+    assert desc.descriptions is not None
+    yield desc
 
 def test_add_description(basic_descriptor, basic_descriptor_dict):
     assert basic_descriptor.next_fib == basic_descriptor_dict["next_fib"]
