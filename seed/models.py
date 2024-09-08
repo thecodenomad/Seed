@@ -1,7 +1,7 @@
 from seed import common, errors
-from pydantic import BaseModel
-from typing import Dict, List, Set
-from pydantic import BaseModel, field_validator, ValidationError
+from pydantic import BaseModel, field_validator, ValidationError, Field
+from pydantic.dataclasses import dataclass
+from typing import Dict, List, Set, Optional
 
 # TODO: Abstract away the calculation aspect so others can modify
 # the mechanism with how a particular asset is LeveledUp. The initial idea
@@ -28,7 +28,7 @@ from pydantic import BaseModel, field_validator, ValidationError
 class Descriptor(BaseModel):
     name: str
     next_fib: int = 1
-    descriptions: List[str] = list()
+    descriptions: List[str]
     # TODO: Should Level Up be something done at the descriptor level?
     level_up: bool = False
 
@@ -36,7 +36,7 @@ class Descriptor(BaseModel):
     # For school should have grades, grades should have students, etc
     # A school can also have engineers, teachers, principles
     # This should be shared descriptor assets that can belong to an asset
-    asset_links: Set[str] = set()
+    asset_links: Set[str] = Field(default_factory=set)
 
     @field_validator('descriptions')
     def validate_descriptions(cls, v):
@@ -46,9 +46,6 @@ class Descriptor(BaseModel):
 
 
     def add_description(self, description):
-        if not self.descriptions:
-            self.descriptions = []
-
         num_words = common.get_num_words(description)
         next_fib = common.get_next_fibonacci(self.next_fib)
 
@@ -143,30 +140,56 @@ class MainSeed(BaseModel):
     global_assets_level_up: bool = False
     global_assets_next_fib: int = FIB_N_LEVEL
 
-    def add_descriptor(self, asset_name, desc_name):
-        self.global_assets[asset_name].add_descriptor(desc_name)
-        self.global_descriptors[desc_name].link_asset(asset_name)
+    def link_descriptor(self, asset_name, descriptor_name):
+        self.global_assets[asset_name].add_descriptor(descriptor_name)
+        self.global_descriptors[descriptor_name].link_asset(asset_name)
 
-    def add_description_to_asset(self, asset_name, descriptor_name, description):
+    def add_description(self, descriptor_name, description):
+        """Adds a description to a descriptor."""
+        # Attempt adding the description
+        self._ensure_descriptor(descriptor_name=descriptor_name)
 
-        # Validate Descriptors
-        if not self.global_descriptors.get(descriptor_name):
-            desc = Descriptor(name=descriptor_name)
-            self.global_descriptors[descriptor_name] = desc
-
-        # Validate Asset
-        if not self.global_assets.get(asset_name):
-            self.global_assets[asset_name] = Asset(name=asset_name, descriptors={descriptor_name})
-
-        # Does this description already exist in the descriptor? If not, add
+        # Make sure the description doesn't already exist
+        # TODO: For anything more than 21 words, should there be a threshold? We don't
+        # want multiple sentences that are the same. Does that even matter for AI Input? Likely not
         desc = self.global_descriptors[descriptor_name]
         if description not in desc.descriptions:
-            desc.add_description(description)
+            self.global_descriptors[descriptor_name].add_description(description)
         else:
+            # TODO: Should be using a logger
             print(f"Description: {description} has already been added to this descriptor: {descriptor_name}")
 
+    def _ensure_asset(self, asset_name):
+        """Helper method to make sure an asset name exists."""
+        if not self.global_assets.get(asset_name):
+            asset = Asset(name=asset_name)
+            self.global_assets[asset_name] = asset
+
+    def _ensure_descriptor(self, descriptor_name):
+        """Helper method to make sure a desriptor name exists."""
+        if not self.global_descriptors.get(descriptor_name):
+            desc = Descriptor(name=descriptor_name, descriptions=[])
+            self.global_descriptors[descriptor_name] = desc
+
+    def _relevel(self):
+        """Helper method to set descriptor and asset levels."""
         self.set_descriptor_level()
         self.set_asset_level()
+
+    def add_description_to_asset(self, asset_name, descriptor_name, description):
+        """Adds a description to an asset."""
+
+        # Create the asset and descriptor objects as necessary
+        self._ensure_descriptor(descriptor_name)
+        self._ensure_asset(asset_name)
+
+        # Add the description to the descriptor and link descriptor to the asset
+        # NOTE: Asset descriptors is a set.
+        self.add_description(descriptor_name, description)
+        self.link_descriptor(asset_name, descriptor_name)
+
+        # set level_up depending upon the Fibonacci requirements
+        self._relevel()
 
     def set_descriptor_level(self):
         # Calculate next fibs for descriptors
@@ -215,6 +238,7 @@ class MainSeed(BaseModel):
         all_descriptions = []
         for _desc in asset_obj.descriptors:
             desc = self.global_descriptors[_desc]
+            print(f"desc: {desc}")
             all_descriptions.extend(desc.descriptions or [])
 
         print(f"All descriptions:\n{all_descriptions}")
