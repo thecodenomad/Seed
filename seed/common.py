@@ -87,7 +87,7 @@ def get_next_fibonacci(n:int):
     if n <= 0:
         return 1
     elif n == 1:
-        return 1
+        return 2
 
     # Initialize the first two Fibonacci numbers
     a, b = 0, 1

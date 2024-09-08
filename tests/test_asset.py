@@ -35,7 +35,6 @@ def test_basic_asset_hashtags(basic_asset, basic_asset_hashtags):
     for i in basic_asset.hashtags:
         assert i in basic_asset_hashtags
 
-@pytest.mark.wip
 def test_add_and_remove_descriptor(basic_asset):
 
     descriptors = ["hecklefish", "hecklefish1", "hecklefish2", "hecklefish3"]
@@ -48,7 +47,6 @@ def test_add_and_remove_descriptor(basic_asset):
 
     for i in descriptors:
         basic_asset.remove_descriptor(i)
-        print(f"Descriptors Num: {len(basic_asset.descriptors)}")
         assert basic_asset.next_fib == common.get_next_fibonacci(len(basic_asset.descriptors))
 
     # It should currently be even

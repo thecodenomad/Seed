@@ -26,18 +26,21 @@ def test_add_description(basic_descriptor, basic_descriptor_dict):
     # Add first description
     basic_descriptor.add_description("red")
     assert "red" in basic_descriptor.descriptions
+    assert basic_descriptor.next_fib == 2
 
     # Add second description
     basic_descriptor.add_description("white")
     assert "white" in basic_descriptor.descriptions
+    assert basic_descriptor.next_fib == 3
 
     # Add second description
     basic_descriptor.add_description("blue hair")
     assert "blue hair" in basic_descriptor.descriptions
+    assert basic_descriptor.next_fib == 5
 
     with pytest.raises(errors.FailedDescriptionLength):
         # next_fib should be 3, so 2 word description is not allowed
-        basic_descriptor.add_description("black shoes")
+        basic_descriptor.add_description("black shoes in sun")
 
 def test_is_shared(basic_descriptor):
     assert not basic_descriptor.is_multi_asset_linked()
@@ -63,3 +66,12 @@ def test_descriptor_sharing(basic_descriptor):
     basic_descriptor.remove_link(test_second_asset_name)
     assert not basic_descriptor.is_multi_asset_linked()
     assert basic_descriptor.is_dangling()
+
+def test_validate_descriptions(basic_descriptor_dict:dict):
+    desc = "this will not work"
+    basic_descriptor_dict["descriptions"] =  [desc]
+
+    json_obj = json.dumps(basic_descriptor_dict)
+    with pytest.raises(errors.FailedDescriptionLength):
+        # next_fib should be 3, so 2 word description is not allowed
+        Descriptor.model_validate_json(json_obj)

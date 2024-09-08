@@ -12,7 +12,10 @@ def test_is_fibonacci():
         assert not common.is_fibonacci(n)
 
 def test_get_next_fibonacci():
-    assert common.get_next_fibonacci(1) == 1
+
+    # In this conext, n=1 would be recursive, so always
+    # return 2.
+    assert common.get_next_fibonacci(1) == 2
     assert common.get_next_fibonacci(2) == 3
     assert common.get_next_fibonacci(4) == 5
     assert common.get_next_fibonacci(10) == 13

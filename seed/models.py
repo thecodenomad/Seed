@@ -1,6 +1,7 @@
 from seed import common, errors
 from pydantic import BaseModel
 from typing import Dict, List, Set
+from pydantic import BaseModel, field_validator, ValidationError
 
 # TODO: Abstract away the calculation aspect so others can modify
 # the mechanism with how a particular asset is LeveledUp. The initial idea
@@ -26,10 +27,10 @@ from typing import Dict, List, Set
 # This type of object can be associated with a character or place.
 class Descriptor(BaseModel):
     name: str
-    next_fib: int = 0
-    descriptions: List[str] = []
+    next_fib: int = 1
+    descriptions: List[str] = list()
     # TODO: Should Level Up be something done at the descriptor level?
-    # level_up: bool = False
+    level_up: bool = False
 
     # A shared descriptor is something that multiple assets can have
     # For school should have grades, grades should have students, etc
@@ -37,29 +38,35 @@ class Descriptor(BaseModel):
     # This should be shared descriptor assets that can belong to an asset
     asset_links: Set[str] = set()
 
+    @field_validator('descriptions')
+    def validate_descriptions(cls, v):
+        for item in v:
+            if not common.is_fibonacci(common.get_num_words(item)):
+                raise errors.FailedDescriptionLength("Description length does not equal a Fibonacci number")
+
+
     def add_description(self, description):
+        if not self.descriptions:
+            self.descriptions = []
 
         num_words = common.get_num_words(description)
         next_fib = common.get_next_fibonacci(self.next_fib)
 
-        # This should satisfy entries with 1 word
-        if len(self.descriptions) == 2:
-            next_fib = 2
-
-        # If the description length equals the next fibonacci sequence, add it
-        # else fail. No level up here, descriptions must always be a fibonacci number
-        # For descriptions, this is the way.
-        if num_words != next_fib:
-            print("In conditional num_words ! =next_fib")
-            msg = f"Required {self.next_fib} length for the description"
+        # KIS - The description length (number of words) should equal a Fibonacci number
+        if not common.is_fibonacci(num_words):
+            msg = f"Required Fibonacci length for the description"
             raise errors.FailedDescriptionLength(msg)
 
-        # Add the description to the hash tag
-        print("Adding description in descriptor")
         self.descriptions.append(description.lower())
+        self.level_up = False
 
-        # Set the next description length
-        self.next_fib = next_fib
+        # If the number of descriptions equals the next_fib, then there is a level_up which bumps
+        # the next_fib to the next Fibonacci number
+        if self.next_fib == len(self.descriptions) or len(self.descriptions) < 3:
+            # Add the description to the hash tag
+            self.level_up = True
+            self.next_fib = common.get_next_fibonacci(self.next_fib)
+
 
     def is_dangling(self):
         """Determines if this descriptor doesn't belong to an asset"""
@@ -81,7 +88,7 @@ class Descriptor(BaseModel):
 # Each descriptor will have descriptions added to it.
 class Asset(BaseModel):
     name: str
-    next_fib: int = 0
+    next_fib: int = 1
     descriptors: Set[str] = set()
 
     # This is used to determine when the number of descriptions matches the
@@ -94,22 +101,29 @@ class Asset(BaseModel):
 
     # TODO: add/remove hashtags
     def add_descriptor(self, descriptor_name):
+        """Add a descriptor to this asset.  When this occurs level up will always be False, unless the number of
+        descriptors matches that of a fibonacci number (1,2,3,5,8). """
         self.descriptors.add(descriptor_name.lower())
-        if self.next_fib == len(self.descriptors):
-            self.level_up = True
-            self.next_fib = common.get_next_fibonacci(self.next_fib)
+        self.set_level()
 
     def remove_descriptor(self, descriptor_name):
-        self.level_up = False
+        """Remove a descriptor from this asset. When this occurs level up will always be False, unless the number of
+        descriptors matches that of a fibonacci number (1,2,3,5,8,etc). """
+        # self.level_up = False
         self.descriptors.remove(descriptor_name.lower())
-        if self.next_fib <= len(self.descriptors):
-            self.next_fib = common.get_next_fibonacci(len(self.descriptors))
+        self.set_level()
 
+    def set_level(self):
+        """Re-establish the next_fib value. If the number of descriptors matches a fibonacci number, then
+        the next_fib is always the next literal fibonacci number."""
+        num_descriptors = len(self.descriptors)
+        self.next_fib = common.get_next_fibonacci(num_descriptors)
+
+    # Only time this occurs is when a Fibonacci number in length occurs
     def is_uneven(self):
-        print(f"Uneven check: {len(self.descriptors)} != {self.next_fib}")
-        if len(self.descriptors) <= 3:
-            return common.get_fibonacci(len(self.descriptors)) != self.next_fib
-        return len(self.descriptors) != self.next_fib
+        if common.is_fibonacci(len(self.descriptors)):
+            return False
+        return True
 
     @property
     def hashtags(self):
@@ -122,52 +136,69 @@ FIB_N_LEVEL = 1
 class MainSeed(BaseModel):
     """The Global Seed to be fed into an AI Model."""
 
-    global_descriptors: List[Descriptor] = []
+    global_descriptors: Dict[str, Descriptor] = {}
     global_desc_level_up: bool = False
     global_desc_next_fib: int = FIB_N_LEVEL
 
-    global_assets: List[Asset] = []
+    global_assets: Dict[str, Asset] = {}
     global_assets_level_up: bool = False
     global_assets_next_fib: int = FIB_N_LEVEL
 
 
     def add_description_to_asset(self, asset_name, descriptor_name, description):
 
+        # Validate Descriptors
+        if not self.global_descriptors.get(descriptor_name):
+            desc = Descriptor(name=descriptor_name)
+            self.global_descriptors[descriptor_name] = desc
+
         # Validate Asset
+        if not self.global_assets.get(asset_name):
+            self.global_assets[asset_name] = Asset(name=asset_name, descriptors={descriptor_name})
 
-
-        # Validate Descripts
-
-        # Check to see if the hashtag
-        if hashtag in self.descriptors:
-            self.global_descriptors[hashtag].add_description(description)
+        # Does this description already exist in the descriptor? If not, add
+        desc = self.global_descriptors[descriptor_name]
+        if description not in desc.descriptions:
+            desc.add_description(description)
         else:
-            # Create new descriptor
-            descriptor = Descriptor(name=hashtag, next_fib=0)
+            print(f"Description: {description} has already been added to this descriptor: {descriptor_name}")
 
-            # Must still pass the validation
-            descriptor.add_description(description)
+        self.set_descriptor_level()
+        self.set_asset_level()
 
-            # TODO: This should be an external method to update the global state
-            self.global_descriptors[hashtag] = descriptor
+    def set_descriptor_level(self):
+        # Calculate next fibs for descriptors
+        num_descriptors = len(self.global_descriptors)
+        self.global_desc_level_up = False
+        if num_descriptors == self.global_desc_next_fib:
+            # n for Fib(n)
+            self.global_desc_next_fib = common.get_next_fibonacci(num_descriptors)
+            self.global_desc_level_up = True
 
-        # Level Up occurs only when the number of descriptors match the
-        # next_fib value. The LevelUp attribute is used to quickly determine
-        # which assets are considered incomplete to prioritize prompts to/from
-        # the AI model.
-        num_hashtags = len(self.descriptors)
-        print(f"num_hastags: {num_hashtags}")
-        if num_hashtags == self.next_fib:
-            self.level_up = True
-            self.next_fib = common.get_next_fibonacci(self.next_fib)
-        else:
-            self.level_up = False
+    def set_asset_level(self):
+        # Calculate next fibs for descriptors
+        num_assets = len(self.global_assets)
+        self.global_assets_level_up = False
+        if num_assets == self.global_assets_next_fib:
+            # n for Fib(n)
+            self.global_assets_next_fib = common.get_next_fibonacci(num_assets)
+            self.global_assets_level_up = True
 
     # TODO: Make more performant, maybe a map of some sort with a lazy load?
-    def has_asset_relation(self):
-        """ Determines if an asset relates to another asset via a shared descriptor """
-        for i in self.descriptors:
-            pass
+    def asset_relations(self, sibling_asset:Asset):
+        """Determines if an asset relates to another asset via a shared descriptor.
+        Args:
+            sibling_asset: The asset looking for siblings
+        """
+        relations = {}
+        for asset_name, asset_obj in self.global_assets.items():
+            # Skip the sibbling_asset that was passed in
+            if asset_name == sibling_asset.name:
+                continue
 
-        self.shared_descriptors = [name for name in self.descriptors if o.is_multi_asset_linked()]
-        return len(self.shared_descriptors) > 0
+            # All descriptors for this asset, see if one of those is in the asset to find relations
+            for descriptor_name in asset_obj.descriptors:
+                if descriptor_name in sibling_asset.descriptors:
+                    relations[descriptor_name] = sibling_asset.name
+
+        return relations
