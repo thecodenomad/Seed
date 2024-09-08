@@ -143,6 +143,9 @@ class MainSeed(BaseModel):
     global_assets_level_up: bool = False
     global_assets_next_fib: int = FIB_N_LEVEL
 
+    def add_descriptor(self, asset_name, desc_name):
+        self.global_assets[asset_name].add_descriptor(desc_name)
+        self.global_descriptors[desc_name].link_asset(asset_name)
 
     def add_description_to_asset(self, asset_name, descriptor_name, description):
 

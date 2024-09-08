@@ -107,8 +107,22 @@ def test_asset_relations(test_seed:MainSeed, test_seed_dict:dict):
     for i in [asset_one_name, asset_two_name]:
         assert len(test_seed.asset_relations(i)) == 0
 
-    test_seed.global_assets[asset_one_name].descriptors.add(desc_one_name)
-    test_seed.global_assets[asset_two_name].descriptors.add(desc_one_name)
+    # Should be dangling
+    assert test_seed.global_descriptors[desc_one_name].is_dangling()
+
+    #TODO: there needs to be a global trigger to set the proper test seed
+
+    # Should not be multi asset linked yet, but is no longer dangling
+    test_seed.add_descriptor(asset_one_name, desc_one_name)
+    assert not test_seed.global_descriptors[desc_one_name].is_multi_asset_linked()
+    assert not test_seed.global_descriptors[desc_one_name].is_dangling()
+
+    # "share" the descriptor with another asset
+    test_seed.add_descriptor(asset_two_name, desc_one_name)
+
+    # Not dangling because multiple assets are using it
+    assert test_seed.global_descriptors[desc_one_name].is_multi_asset_linked()
+    assert not test_seed.global_descriptors[desc_one_name].is_dangling()
 
     a1_relations = test_seed.asset_relations(asset_one_name)
     a2_relations = test_seed.asset_relations(asset_two_name)
@@ -118,6 +132,10 @@ def test_asset_relations(test_seed:MainSeed, test_seed_dict:dict):
 
     # Validate in the opposite direction
     assert a2_relations[desc_one_name] == asset_one_name
+
+    # The descriptor should have mutiple links now
+   # assert not test_seed.global_descriptors[desc_one_name].is_dangling()
+    assert test_seed.global_descriptors[desc_one_name].is_multi_asset_linked()
 
     # Test exporting
     test_seed.export_asset_descriptions(asset_one_name)
