@@ -205,3 +205,14 @@ class MainSeed(BaseModel):
                     relations[descriptor_name] = asset_obj.name
 
         return relations
+
+    def export_asset_descriptions(self, asset_name):
+        asset_obj = self.global_assets[asset_name]
+
+        all_descriptions = []
+        for _desc in asset_obj.descriptors:
+            desc = self.global_descriptors[_desc]
+            all_descriptions.extend(desc.descriptions or [])
+
+        print(f"All descriptions:\n{all_descriptions}")
+        return all_descriptions

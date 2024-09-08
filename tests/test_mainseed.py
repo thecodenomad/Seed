@@ -119,10 +119,9 @@ def test_asset_relations(test_seed:MainSeed, test_seed_dict:dict):
     # Validate in the opposite direction
     assert a2_relations[desc_one_name] == asset_one_name
 
+    # Test exporting
+    test_seed.export_asset_descriptions(asset_one_name)
+
     # Try searching for relations with an asset that doesn't exist
     with pytest.raises(errors.SeedException):
         test_seed.asset_relations("bogus_asset")
-
-def test_export_mainseed(test_seed:MainSeed):
-    test_seed.json()
-    
