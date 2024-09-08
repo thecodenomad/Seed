@@ -1,36 +1,38 @@
 {
-    "character1": {
-        "soldier": {
-            "next_fib": 13,
-            "descriptions": [
-                "blonde",
-                "young",
-                "27 years old",
-                "Blonde hair, and blue eyes",
-                "Fought against the Nazis in the early 40s",
-                "<get juices flowing, requires logical processing to force certain number of word causing logical thinking of the situation or person with respect to the main prompt, 'soldier'">
-            ]
+    "global_descriptors": {
+        "desc1": {
+            "name": "desc1",
+            "next_fib": 1,
+            "asset_links": [],
+            "descriptions": ["red"]
         },
-        "engineer": {
-            "next_fib": 3,
-            "descriptions": [
-                "electrical",
-                "computers",
-                "auotomation engineer"
-            ]
+        "desc2": {
+            "name": "desc2",
+            "next_fib": 1,
+            "asset_links": [],
+            "descriptions": ["white"]
+        },
+        "desc3": {
+            "name": "desc3",
+            "next_fib": 1,
+            "asset_links": [],
+            "descriptions": ["blue flag"]
         }
     },
-    "setting1": {
-        "soldiers": {
+    "global_desc_level_up": false,
+    "global_desc_next_fib": 5,
+    "global_assets": {
+        "character1": {
+            "name": "character1",
             "next_fib": 1,
-            "descriptions": []
+            "descriptors": []
         },
-        "mountains": {
+        "setting1": {
+            "name": "setting1",
             "next_fib": 1,
-            "descriptions": []
+            "descriptors": []
         }
     },
-    "character2": {},
-    "setting2": {},
-    "character3": {}
+    "global_assets_level_up": false,
+    "global_assets_next_fib": 3
 }

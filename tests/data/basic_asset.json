@@ -1,4 +1,5 @@
 {
-    "name": "character1",
-    "descriptors": {}
+    "name": "character",
+    "descriptors": ["1", "1.0"],
+    "next_fib": 3
 }
