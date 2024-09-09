@@ -1,0 +1,65 @@
+name: Continuous Integration
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    Quality:
+        runs-on: ubuntu-latest
+        steps:
+            # Checkout the code from this repo
+            - uses: actions/checkout@v2
+
+            # Setup the specific version of python (this can be matrix-ified)
+            - uses: actions/setup-python@v2
+              with:
+                  python-version: 3.12
+
+            - name: Install Python Poetry
+              uses: abatilo/actions-poetry@v2.1.0
+              with:
+                  poetry-version: 1.1.2
+
+            - name: Configure poetry
+              shell: bash
+              run: |
+                  poetry config virtualenvs.create true --local
+                  poetry config virtualenvs.in-project true --local
+
+            # Avoid cycles of installing dependencies
+            - uses: actions/cache@v3
+              name: Define a cache for the virtual environment based on the dependencies lock file
+              with:
+                  path: ./.venv
+                  key: venv-${{ hashFiles('poetry.lock') }}
+
+            - name: Dependency Install
+              run: poetry install
+
+            - name: Run Black
+              run: |
+                  black seed
+
+            - name: Tests
+              run: poetry run pytest -v -s
+
+
+    # Release:
+    #     needs: Quality
+    #     # https://github.community/t/how-do-i-specify-job-dependency-running-in-another-workflow/16482
+    #     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, 'chore(release):')
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - uses: actions/setup-python@v2
+    #           with:
+    #               python-version: 3.12
+    #         - name: Checkout code
+    #           uses: actions/checkout@v2
+    #         - name: Semantic Release
+    #           run: |
+    #               pip install python-semantic-release
+    #               git config user.name github-actions
+    #               git config user.email github-actions@github.com
+    #               semantic-release publish

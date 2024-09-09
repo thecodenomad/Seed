@@ -3,6 +3,7 @@ from pydantic import BaseModel, field_validator, ValidationError, Field
 from pydantic.dataclasses import dataclass
 from typing import Dict, List, Set, Optional
 
+
 # A descriptor is a a 'hashtag' used for searching related material.
 # This type of object can be associated with a character or place.
 class Descriptor(BaseModel):
@@ -18,11 +19,13 @@ class Descriptor(BaseModel):
     # This should be shared descriptor assets that can belong to an asset
     asset_links: Set[str] = Field(default_factory=set)
 
-    @field_validator('descriptions')
+    @field_validator("descriptions")
     def validate_descriptions(cls, v):
         for item in v:
             if not common.is_fibonacci(common.get_num_words(item)):
-                raise errors.FailedDescriptionLength("Description length does not equal a Fibonacci number")
+                raise errors.FailedDescriptionLength(
+                    "Description length does not equal a Fibonacci number"
+                )
         return v
 
     def add_description(self, description):
@@ -65,7 +68,13 @@ class Descriptor(BaseModel):
 
     def remove_link(self, asset_name):
         """Remove an asset link to this descriptor."""
-        self.asset_links = set([i for _,i in enumerate(self.asset_links) if i.lower() != asset_name.lower()])
+        self.asset_links = set(
+            [
+                i
+                for _, i in enumerate(self.asset_links)
+                if i.lower() != asset_name.lower()
+            ]
+        )
 
     def is_uneven(self):
         """Uneven is determined based on the number of descriptions matching a Fibonacci number."""

@@ -5,6 +5,7 @@ from typing import Dict, List, Set, Optional
 
 FIB_N_LEVEL = 1
 
+
 # This should be exportable into something consumable by an AI model / Pytorch
 class MainSeed(BaseModel):
     """The Global Seed to be fed into an AI Model."""
@@ -37,7 +38,9 @@ class MainSeed(BaseModel):
             self.global_descriptors[descriptor_name].add_description(description)
         else:
             # TODO: Should be using a logger
-            print(f"Description: {description} has already been added to this descriptor: {descriptor_name}")
+            print(
+                f"Description: {description} has already been added to this descriptor: {descriptor_name}"
+            )
 
     def _ensure_asset(self, asset_name):
         """Helper method to make sure an asset name exists."""
@@ -82,7 +85,7 @@ class MainSeed(BaseModel):
         self.global_assets_level_up = common.is_fibonacci(num_assets)
 
     # TODO: Make more performant, maybe a map of some sort with a lazy load?
-    def asset_relations(self, sibling_name:str):
+    def asset_relations(self, sibling_name: str):
         """Determines if an asset relates to another asset via a shared descriptor.
         Args:
             sibling_asset: The asset looking for siblings
