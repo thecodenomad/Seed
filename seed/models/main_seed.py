@@ -1,4 +1,6 @@
-"""Contains the MainSeed"""
+"""The purpose of this module is to create an entrypoint for data collected for
+assets and descriptors. These may included shared descriptors, which link the
+assets together."""
 
 from typing import Dict
 
