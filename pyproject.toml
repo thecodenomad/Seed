@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "seed"
-version = "0.1.0"
+version = "0.1.1"
 description = "Writer helper"
 authors = ["codenomad <codenomad@gmail.com>"]
 readme = "README.md"
@@ -45,8 +45,11 @@ show_missing = true
 line-length = 127
 
 [tool.semantic_release]
-version_variable = ["seed/__init__.py:__version__", "pyproject.toml:version"]
+version_toml = ["pyproject.toml:tool.poetry.version"]
+version_variable = ["seed/__init__.py:__version__"]
+version_pattern = ["README.md:rev: v{version}"]
+major_on_zero = false
 branch = "main"
-upload_to_pypi = false
+upload_to_PyPI = false
 upload_to_release = true
 build_command = "pip install poetry && poetry build"
