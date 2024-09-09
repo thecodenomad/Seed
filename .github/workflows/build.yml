@@ -17,12 +17,11 @@ jobs:
               with:
                   python-version: 3.12
 
+            # Install latest version of poetry
             - name: Install Python Poetry
               uses: abatilo/actions-poetry@v2.1.0
-              with:
-                  poetry-version: 1.1.2
 
-            - name: Configure poetry
+            - name: Setup poetry to make use of caching
               shell: bash
               run: |
                   poetry config virtualenvs.create true --local
@@ -44,7 +43,6 @@ jobs:
 
             - name: Tests
               run: poetry run pytest -v -s
-
 
     # Release:
     #     needs: Quality
