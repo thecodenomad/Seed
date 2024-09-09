@@ -1,0 +1,19 @@
+[MASTER]
+jobs=4 #number of processes to use
+ignore=tests
+
+[BASIC]
+
+# Good variable names which should always be accepted, separated by a comma
+good-names=i,j,k,ex,Run,_
+
+# Bad variable names which should always be refused, separated by a comma
+bad-names=foo,bar,baz,toto,tutu,tata
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=127
+
+[MESSAGE CONTROL]
+disable=W0511

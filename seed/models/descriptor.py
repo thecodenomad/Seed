@@ -1,12 +1,17 @@
+"""Contains a base Descriptor that is consumed by the MainSeed"""
+
+from typing import List, Set
+
+from pydantic import BaseModel, field_validator, Field
+
 from seed import common, errors
-from pydantic import BaseModel, field_validator, ValidationError, Field
-from pydantic.dataclasses import dataclass
-from typing import Dict, List, Set, Optional
 
 
-# A descriptor is a a 'hashtag' used for searching related material.
-# This type of object can be associated with a character or place.
 class Descriptor(BaseModel):
+    """A descriptor is a a 'hashtag' used for searching related material.
+    This type of object can be associated with a character or place.
+    """
+
     name: str
     next_fib: int = 1
     descriptions: List[str] = Field(default_factory=list)
@@ -19,14 +24,16 @@ class Descriptor(BaseModel):
     # This should be shared descriptor assets that can belong to an asset
     asset_links: Set[str] = Field(default_factory=set)
 
+    # pylint: disable=E0213
     @field_validator("descriptions")
     def validate_descriptions(cls, v):
+        """Each description must be a Fibonacci number in length."""
         for item in v:
             if not common.is_fibonacci(common.get_num_words(item)):
-                raise errors.FailedDescriptionLength(
-                    "Description length does not equal a Fibonacci number"
-                )
+                raise errors.FailedDescriptionLength("Description length does not equal a Fibonacci number")
         return v
+
+    # pylint: enable=E0213
 
     def add_description(self, description):
         """Add a description to the descriptor."""
@@ -34,15 +41,15 @@ class Descriptor(BaseModel):
         # KIS - The description length (number of words) should equal a Fibonacci number
         num_words = common.get_num_words(description)
         if not common.is_fibonacci(num_words):
-            msg = f"Required Fibonacci length for the description"
+            msg = "Required Fibonacci length for the description"
             raise errors.FailedDescriptionLength(msg)
 
-        self.descriptions.append(description.lower())
+        self.descriptions.append(description.lower())  # pylint: disable=E1101
         self.set_level()
 
     def remove_description(self, description):
         """Remove a description from the descriptor"""
-        self.descriptions.remove(description.lower())
+        self.descriptions.remove(description.lower())  # pylint: disable=E1101
         self.set_level()
 
     def set_level(self):
@@ -68,13 +75,7 @@ class Descriptor(BaseModel):
 
     def remove_link(self, asset_name):
         """Remove an asset link to this descriptor."""
-        self.asset_links = set(
-            [
-                i
-                for _, i in enumerate(self.asset_links)
-                if i.lower() != asset_name.lower()
-            ]
-        )
+        self.asset_links = {i for _, i in enumerate(self.asset_links) if i.lower() != asset_name.lower()}
 
     def is_uneven(self):
         """Uneven is determined based on the number of descriptions matching a Fibonacci number."""

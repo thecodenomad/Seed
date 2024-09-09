@@ -1,6 +1,4 @@
-#
-# Module to handle custom seed exceptions
-#
+"""Module to handle custom seed exceptions"""
 
 
 class SeedException(Exception):

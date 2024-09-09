@@ -1,13 +1,18 @@
-from seed import common, errors
-from pydantic import BaseModel, field_validator, ValidationError, Field
-from pydantic.dataclasses import dataclass
-from typing import Dict, List, Set, Optional
+"""Contains a base Asset that is consumed by the MainSeed"""
+
+from typing import Set
+
+from pydantic import BaseModel
+
+from seed import common
 
 
-# An Asset in the context of this application is a singular object or place
-# that requires descriptions. Assets will contain descriptors as hashtags.
-# Each descriptor will have descriptions added to it.
 class Asset(BaseModel):
+    """An Asset in the context of this application is a singular object or place
+    that requires descriptions. Assets will contain descriptors as hashtags.
+    Each descriptor will have descriptions added to it.
+    """
+
     name: str
     next_fib: int = 1
     descriptors: Set[str] = set()
@@ -45,8 +50,10 @@ class Asset(BaseModel):
 
     # Only time this occurs is when a Fibonacci number in length occurs
     def is_uneven(self):
+        """Checks if the current number of descriptors is a Fibonacci number"""
         return not self.level_up
 
     @property
     def hashtags(self):
+        """Helper representation of descriptors"""
         return self.descriptors

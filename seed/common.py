@@ -1,6 +1,5 @@
-#
-# This module is meant for helper functions
-#
+"""This module is meant for helper functions"""
+
 import re
 
 
@@ -88,7 +87,8 @@ def get_next_fibonacci(n: int):
     # Handle base cases
     if n <= 0:
         return 1
-    elif n == 1:
+
+    if n == 1:
         return 2
 
     # Initialize the first two Fibonacci numbers
@@ -102,8 +102,7 @@ def get_next_fibonacci(n: int):
     if b == n:
         return a + b
     # If b is greater than n, b is the next Fibonacci number
-    else:
-        return b
+    return b
 
 
 def get_prev_fibonacci(n: int):
