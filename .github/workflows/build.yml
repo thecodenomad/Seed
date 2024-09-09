@@ -10,16 +10,18 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             # Checkout the code from this repo
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
 
             # Setup the specific version of python (this can be matrix-ified)
-            - uses: actions/setup-python@v2
+            - uses: actions/setup-python@v4
               with:
                   python-version: 3.12
 
             # Install latest version of poetry
             - name: Install Python Poetry
               uses: abatilo/actions-poetry@v2.1.0
+              with:
+                  poetry-version: 1.8
 
             - name: Setup poetry to make use of caching
               shell: bash
