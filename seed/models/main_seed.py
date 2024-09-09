@@ -1,23 +1,29 @@
-from seed import common, errors, models
-from pydantic import BaseModel, field_validator, ValidationError, Field
-from pydantic.dataclasses import dataclass
-from typing import Dict, List, Set, Optional
+"""Contains the MainSeed"""
+
+from typing import Dict
+
+from pydantic import BaseModel
+
+from seed import common, errors
+from seed.models import Asset, Descriptor
 
 FIB_N_LEVEL = 1
+
 
 # This should be exportable into something consumable by an AI model / Pytorch
 class MainSeed(BaseModel):
     """The Global Seed to be fed into an AI Model."""
 
-    global_descriptors: Dict[str, models.Descriptor] = {}
+    global_descriptors: Dict[str, Descriptor] = {}
     global_desc_level_up: bool = False
     global_desc_next_fib: int = FIB_N_LEVEL
 
-    global_assets: Dict[str, models.Asset] = {}
+    global_assets: Dict[str, Asset] = {}
     global_assets_level_up: bool = False
     global_assets_next_fib: int = FIB_N_LEVEL
 
     def link_descriptor(self, asset_name, descriptor_name):
+        """Link a descriptor to an asset"""
         self.global_assets[asset_name].add_descriptor(descriptor_name)
         self.global_descriptors[descriptor_name].link_asset(asset_name)
 
@@ -42,14 +48,14 @@ class MainSeed(BaseModel):
     def _ensure_asset(self, asset_name):
         """Helper method to make sure an asset name exists."""
         if not self.global_assets.get(asset_name):
-            asset = models.Asset(name=asset_name)
+            asset = Asset(name=asset_name)
             self.global_assets[asset_name] = asset
         self._set_asset_level()
 
     def _ensure_descriptor(self, descriptor_name):
         """Helper method to make sure a desriptor name exists."""
         if not self.global_descriptors.get(descriptor_name):
-            desc = models.Descriptor(name=descriptor_name)
+            desc = Descriptor(name=descriptor_name)
             self.global_descriptors[descriptor_name] = desc
         self._set_descriptor_level()
 
@@ -70,19 +76,21 @@ class MainSeed(BaseModel):
         self.link_descriptor(asset_name, descriptor_name)
 
     def _set_descriptor_level(self):
+        """Level the global descriptors by checking to see if the list is a Fibonacci number in length"""
         # Calculate next fibs for descriptors
         num_descriptors = len(self.global_descriptors)
         self.global_desc_next_fib = common.get_next_fibonacci(num_descriptors)
         self.global_desc_level_up = common.is_fibonacci(num_descriptors)
 
     def _set_asset_level(self):
+        """Level the global assets by checking to see if the list is a Fibonacci number in length"""
         # Calculate next fibs for descriptors
         num_assets = len(self.global_assets)
         self.global_assets_next_fib = common.get_next_fibonacci(num_assets)
         self.global_assets_level_up = common.is_fibonacci(num_assets)
 
     # TODO: Make more performant, maybe a map of some sort with a lazy load?
-    def asset_relations(self, sibling_name:str):
+    def asset_relations(self, sibling_name: str):
         """Determines if an asset relates to another asset via a shared descriptor.
         Args:
             sibling_asset: The asset looking for siblings
@@ -107,6 +115,7 @@ class MainSeed(BaseModel):
         return relations
 
     def export_asset_descriptions(self, asset_name):
+        """Export all descriptions for a given asset in a single list."""
         asset_obj = self.global_assets[asset_name]
 
         all_descriptions = []

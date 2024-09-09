@@ -2,21 +2,24 @@ import json
 import pytest
 
 from pydantic_core import from_json
-from seed.models import MainSeed
+from seed.models.main_seed import MainSeed
 from seed import common, errors
 
 pytestmark = pytest.mark.asset
+
 
 @pytest.fixture(scope="function")
 def test_seed_dict(basic_json):
     obj = json.loads(basic_json)
     yield obj
 
+
 @pytest.fixture(scope="function")
 def test_seed(basic_json):
     yield MainSeed.model_validate_json(basic_json)
 
-def test_adding_assets(test_seed_dict:dict):
+
+def test_adding_assets(test_seed_dict: dict):
     test_seed = MainSeed()
     asset_one_name = list(test_seed_dict["global_assets"].keys())[0]
 
@@ -53,7 +56,8 @@ def test_adding_assets(test_seed_dict:dict):
     assert test_seed.global_assets_next_fib == 5
     assert not test_seed.global_assets_level_up
 
-def test_adding_description(test_seed:MainSeed, test_seed_dict:dict):
+
+def test_adding_description(test_seed: MainSeed, test_seed_dict: dict):
     desc_one_name = list(test_seed_dict["global_descriptors"].keys())[0]
     missing_desc_name = "DoesNotExist"
 
@@ -78,6 +82,7 @@ def test_adding_description(test_seed:MainSeed, test_seed_dict:dict):
     with pytest.raises(errors.FailedDescriptionLength):
         test_seed.add_description(desc_one_name, "test4 test4 test4 test4")
 
+
 def test_adding_description_to_asset():
     descriptor_name = "soldier"
     asset_name = "billy"
@@ -90,26 +95,23 @@ def test_adding_description_to_asset():
     assert not _test_seed.global_descriptors.get(descriptor_name)
 
     # Add an asset, this will result in a single asset and a single descriptor
-    _test_seed.add_description_to_asset(asset_name=asset_name,
-        descriptor_name=descriptor_name, description=description)
+    _test_seed.add_description_to_asset(asset_name=asset_name, descriptor_name=descriptor_name, description=description)
     assert _test_seed.global_desc_next_fib == 2
     assert _test_seed.global_assets.get(asset_name)
     assert _test_seed.global_descriptors.get(descriptor_name)
     assert description in _test_seed.global_descriptors[descriptor_name].descriptions
 
     # Re-add the same asset, nothing should happen
-    _test_seed.add_description_to_asset(asset_name=asset_name,
-        descriptor_name=descriptor_name, description=description)
+    _test_seed.add_description_to_asset(asset_name=asset_name, descriptor_name=descriptor_name, description=description)
     assert _test_seed.global_desc_next_fib == 2
 
     # Add an additional descriptor
-    _test_seed.add_description_to_asset(asset_name=asset_name,
-        descriptor_name="desc-test-1",
-        description="test")
+    _test_seed.add_description_to_asset(asset_name=asset_name, descriptor_name="desc-test-1", description="test")
     # 2 descriptors at this point
     assert _test_seed.global_desc_next_fib == 3
 
-def test_adding_descriptors(test_seed_dict:dict):
+
+def test_adding_descriptors(test_seed_dict: dict):
     test_seed = MainSeed()
     desc_one_name = list(test_seed_dict["global_descriptors"].keys())[0]
 
@@ -146,12 +148,14 @@ def test_adding_descriptors(test_seed_dict:dict):
     assert test_seed.global_desc_next_fib == 5
     assert not test_seed.global_desc_level_up
 
-def test_adding_relation_to_invalid_asset(test_seed:MainSeed):
+
+def test_adding_relation_to_invalid_asset(test_seed: MainSeed):
     # Try searching for relations with an asset that doesn't exist
     with pytest.raises(errors.AssetNotFound):
         test_seed.asset_relations("bogus_asset")
 
-def test_asset_relation(test_seed:MainSeed, test_seed_dict:dict):
+
+def test_asset_relation(test_seed: MainSeed, test_seed_dict: dict):
     asset_one_name = list(test_seed_dict["global_assets"].keys())[0]
     asset_two_name = list(test_seed_dict["global_assets"].keys())[1]
     desc_one_name = list(test_seed_dict["global_descriptors"].keys())[0]
@@ -190,7 +194,8 @@ def test_asset_relation(test_seed:MainSeed, test_seed_dict:dict):
     assert not test_seed.global_descriptors[desc_one_name].is_dangling()
     assert test_seed.global_descriptors[desc_one_name].is_multi_asset_linked()
 
-def test_exported_asset(test_seed:MainSeed, test_seed_dict:dict):
+
+def test_exported_asset(test_seed: MainSeed, test_seed_dict: dict):
     asset_one_name = list(test_seed_dict["global_assets"].keys())[0]
     desc_one_name = list(test_seed_dict["global_descriptors"].keys())[0]
 
@@ -213,7 +218,8 @@ def test_exported_asset(test_seed:MainSeed, test_seed_dict:dict):
     assert short_description.lower() in exported_asset
     assert longer_description.lower() in exported_asset
 
-def test_globals(test_seed:MainSeed, test_seed_dict:dict):
+
+def test_globals(test_seed: MainSeed, test_seed_dict: dict):
     # Test for descriptors
     for desc_name, _ in test_seed_dict["global_descriptors"].items():
         # Assert each name from json file / dict exists
@@ -222,17 +228,17 @@ def test_globals(test_seed:MainSeed, test_seed_dict:dict):
     assert test_seed.global_desc_next_fib == test_seed_dict["global_desc_next_fib"]
 
     # Test for Assets
-    for asset_name,_ in test_seed_dict["global_assets"].items():
+    for asset_name, _ in test_seed_dict["global_assets"].items():
         # Assert each name from json file / dict exists
         assert test_seed.global_assets.get(asset_name)
     assert test_seed.global_assets_level_up == test_seed_dict["global_assets_level_up"]
     assert test_seed.global_assets_next_fib == test_seed_dict["global_assets_next_fib"]
 
-def test_invalid_description(test_seed:MainSeed):
+
+def test_invalid_description(test_seed: MainSeed):
     descriptor_name = "desert"
     asset_name = "phoenix"
     description = "this is not fibonacci num in length"
 
     with pytest.raises(errors.FailedDescriptionLength):
-        test_seed.add_description_to_asset(asset_name=asset_name,
-            descriptor_name=descriptor_name, description=description)
+        test_seed.add_description_to_asset(asset_name=asset_name, descriptor_name=descriptor_name, description=description)

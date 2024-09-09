@@ -1,16 +1,17 @@
-#
-# This module is meant for helper functions
-#
+"""This module is meant for helper functions"""
+
 import re
 
-def get_num_words(description:str):
-    """ Get the number of words in a description. Words are separated by white space """
+
+def get_num_words(description: str):
+    """Get the number of words in a description. Words are separated by white space"""
 
     # Split by words
-    num_words = len(re.split(r'\s+', description))
+    num_words = len(re.split(r"\s+", description))
     return num_words
 
-def get_fibonacci(n:int):
+
+def get_fibonacci(n: int):
     """
     Calculate the nth Fibonacci number using recursion.
 
@@ -35,7 +36,7 @@ def get_fibonacci(n:int):
     return get_fibonacci(n - 1) + get_fibonacci(n - 2)
 
 
-def is_fibonacci(n:int):
+def is_fibonacci(n: int):
     """
     Check if a given integer is a Fibonacci number.
 
@@ -59,7 +60,7 @@ def is_fibonacci(n:int):
     discriminant = 5 * n * n + 4
 
     # Check if discriminant is a perfect square
-    m = int(discriminant ** 0.5)
+    m = int(discriminant**0.5)
     if m * m == discriminant:
         return True
 
@@ -67,7 +68,7 @@ def is_fibonacci(n:int):
     discriminant = 5 * n * n - 4
 
     # Check if this discriminant is a perfect square
-    m = int(discriminant ** 0.5)
+    m = int(discriminant**0.5)
     if m * m == discriminant:
         return True
 
@@ -75,7 +76,7 @@ def is_fibonacci(n:int):
     return False
 
 
-def get_next_fibonacci(n:int):
+def get_next_fibonacci(n: int):
     """Get the next number in the fibonacci sequence after n
     Args:
         n (int): The fibonacci number to start
@@ -86,7 +87,8 @@ def get_next_fibonacci(n:int):
     # Handle base cases
     if n <= 0:
         return 1
-    elif n == 1:
+
+    if n == 1:
         return 2
 
     # Initialize the first two Fibonacci numbers
@@ -100,11 +102,10 @@ def get_next_fibonacci(n:int):
     if b == n:
         return a + b
     # If b is greater than n, b is the next Fibonacci number
-    else:
-        return b
+    return b
 
 
-def get_prev_fibonacci(n:int):
+def get_prev_fibonacci(n: int):
     """Get the next number in the fibonacci sequence after n
     Args:
         n (int): The fibonacci number to start
