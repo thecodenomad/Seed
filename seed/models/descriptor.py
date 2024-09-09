@@ -26,23 +26,30 @@ class Descriptor(BaseModel):
         return v
 
     def add_description(self, description):
-        num_words = common.get_num_words(description)
-        next_fib = common.get_next_fibonacci(self.next_fib)
+        """Add a description to the descriptor."""
 
         # KIS - The description length (number of words) should equal a Fibonacci number
+        num_words = common.get_num_words(description)
         if not common.is_fibonacci(num_words):
             msg = f"Required Fibonacci length for the description"
             raise errors.FailedDescriptionLength(msg)
 
         self.descriptions.append(description.lower())
-        self.level_up = False
+        self.set_level()
 
-        # If the number of descriptions equals the next_fib, then there is a level_up which bumps
-        # the next_fib to the next Fibonacci number
-        if self.next_fib == len(self.descriptions) or len(self.descriptions) < 3:
-            # Add the description to the hash tag
-            self.level_up = True
-            self.next_fib = common.get_next_fibonacci(self.next_fib)
+    def remove_description(self, description):
+        """Remove a description from the descriptor"""
+        self.descriptions.remove(description.lower())
+        self.set_level()
+
+    def set_level(self):
+        """Re-establish the next_fib value. If the number of descriptors matches a fibonacci number, then
+        the next_fib is always the next literal fibonacci number."""
+        num_descriptions = len(self.descriptions)
+
+        # Level is basically the length of the descriptoers == a Fibonacci number
+        self.level_up = common.is_fibonacci(num_descriptions)
+        self.next_fib = common.get_next_fibonacci(num_descriptions)
 
     def is_dangling(self):
         """Determines if this descriptor doesn't belong to an asset"""
@@ -53,7 +60,13 @@ class Descriptor(BaseModel):
         return len(self.asset_links) > 1
 
     def link_asset(self, asset_name):
+        """Link an asset to this descriptor"""
         self.asset_links.add(asset_name.lower())
 
     def remove_link(self, asset_name):
-         self.asset_links = set([i for _,i in enumerate(self.asset_links) if i.lower() != asset_name.lower()])
+        """Remove an asset link to this descriptor."""
+        self.asset_links = set([i for _,i in enumerate(self.asset_links) if i.lower() != asset_name.lower()])
+
+    def is_uneven(self):
+        """Uneven is determined based on the number of descriptions matching a Fibonacci number."""
+        return not self.level_up

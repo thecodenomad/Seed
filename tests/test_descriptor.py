@@ -44,8 +44,28 @@ def test_add_description(basic_descriptor, basic_descriptor_dict):
         # next_fib should be 3, so 2 word description is not allowed
         basic_descriptor.add_description("black shoes in sun")
 
-def test_is_shared(basic_descriptor):
-    assert not basic_descriptor.is_multi_asset_linked()
+def test_adding_non_fib_length(basic_descriptor:Descriptor):
+    """Test adding descriptions to a descriptor."""
+
+    # At the start of the test, the descriptor doesn't have a description yet
+    assert basic_descriptor.next_fib == 1
+
+    verify_next_fibs = [ 2,  3,  5,  5,  8,  8,  8]
+    descriptions     = ["1","2","3","4","5","6","7"]
+    basic_descriptor.descriptions = []
+
+    for index, description in enumerate(descriptions):
+        next_fib = basic_descriptor.next_fib
+        basic_descriptor.add_description(description)
+        assert basic_descriptor.next_fib == verify_next_fibs[index]
+
+        # Level Up is set whenever the length of the descriptions equals a Fibonacci number
+        if common.is_fibonacci(len(basic_descriptor.descriptions)):
+            assert basic_descriptor.level_up
+            assert not basic_descriptor.is_uneven()
+        else:
+            assert not basic_descriptor.level_up
+            assert basic_descriptor.is_uneven()
 
 def test_descriptor_sharing(basic_descriptor):
     test_first_asset_name = "character1"
@@ -69,6 +89,38 @@ def test_descriptor_sharing(basic_descriptor):
     assert not basic_descriptor.is_multi_asset_linked()
     assert basic_descriptor.is_dangling()
 
+def test_is_shared(basic_descriptor):
+
+    # Validate no linked / dangling
+    assert not basic_descriptor.is_multi_asset_linked()
+    assert basic_descriptor.is_dangling()
+
+    # Validate no dangling, 1 asset
+    basic_descriptor.link_asset("new-asset")
+    assert not basic_descriptor.is_multi_asset_linked()
+    assert not basic_descriptor.is_dangling()
+
+    # Validate no dangling, multi asset
+    basic_descriptor.link_asset("new-asset-1")
+    assert basic_descriptor.is_multi_asset_linked()
+    assert not basic_descriptor.is_dangling()
+
+def test_remove_description(basic_descriptor, basic_descriptor_dict):
+
+    # There are 0 descriptions at this point
+    assert basic_descriptor.next_fib == basic_descriptor_dict["next_fib"]
+    assert basic_descriptor.next_fib == 1
+
+    # Add first description (0 or 1 descriptors returns 2 for Fib(n))
+    basic_descriptor.add_description("red")
+    assert "red" in basic_descriptor.descriptions
+    assert basic_descriptor.next_fib == 2
+
+    # Remove description
+    basic_descriptor.remove_description("red")
+    assert "red" not in basic_descriptor.descriptions
+    assert basic_descriptor.next_fib == 1
+
 def test_validate_descriptions(basic_descriptor_dict:dict):
     desc = "this will not work"
     basic_descriptor_dict["descriptions"] =  [desc]
@@ -77,14 +129,3 @@ def test_validate_descriptions(basic_descriptor_dict:dict):
     with pytest.raises(errors.FailedDescriptionLength):
         # next_fib should be 3, so 2 word description is not allowed
         Descriptor.model_validate_json(json_obj)
-
-def test_adding_non_fib_length(basic_descriptor:Descriptor):
-
-    verify_next_fibs = [2,3,5,5,8,8,8]
-    descriptions = ["1","2","3","4","5","6","7"]
-    basic_descriptor.descriptions = []
-
-    for index, description in enumerate(descriptions):
-        next_fib = basic_descriptor.next_fib
-        basic_descriptor.add_description(description)
-        assert basic_descriptor.next_fib == verify_next_fibs[index]

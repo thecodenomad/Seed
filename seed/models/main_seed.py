@@ -26,6 +26,9 @@ class MainSeed(BaseModel):
         # Attempt adding the description
         self._ensure_descriptor(descriptor_name=descriptor_name)
 
+        # Sanitize
+        description = description.lower()
+
         # Make sure the description doesn't already exist
         # TODO: For anything more than 21 words, should there be a threshold? We don't
         # want multiple sentences that are the same. Does that even matter for AI Input? Likely not
@@ -41,20 +44,21 @@ class MainSeed(BaseModel):
         if not self.global_assets.get(asset_name):
             asset = models.Asset(name=asset_name)
             self.global_assets[asset_name] = asset
+        self._set_asset_level()
 
     def _ensure_descriptor(self, descriptor_name):
         """Helper method to make sure a desriptor name exists."""
         if not self.global_descriptors.get(descriptor_name):
-            desc = models.Descriptor(name=descriptor_name, descriptions=[])
+            desc = models.Descriptor(name=descriptor_name)
             self.global_descriptors[descriptor_name] = desc
-
-    def _relevel(self):
-        """Helper method to set descriptor and asset levels."""
-        self.set_descriptor_level()
-        self.set_asset_level()
+        self._set_descriptor_level()
 
     def add_description_to_asset(self, asset_name, descriptor_name, description):
         """Adds a description to an asset."""
+
+        # Sanitize
+        asset_name = asset_name.lower()
+        descriptor_name = descriptor_name.lower()
 
         # Create the asset and descriptor objects as necessary
         self._ensure_descriptor(descriptor_name)
@@ -65,26 +69,17 @@ class MainSeed(BaseModel):
         self.add_description(descriptor_name, description)
         self.link_descriptor(asset_name, descriptor_name)
 
-        # set level_up depending upon the Fibonacci requirements
-        self._relevel()
-
-    def set_descriptor_level(self):
+    def _set_descriptor_level(self):
         # Calculate next fibs for descriptors
         num_descriptors = len(self.global_descriptors)
-        self.global_desc_level_up = False
-        if num_descriptors == self.global_desc_next_fib:
-            # n for Fib(n)
-            self.global_desc_next_fib = common.get_next_fibonacci(num_descriptors)
-            self.global_desc_level_up = True
+        self.global_desc_next_fib = common.get_next_fibonacci(num_descriptors)
+        self.global_desc_level_up = common.is_fibonacci(num_descriptors)
 
-    def set_asset_level(self):
+    def _set_asset_level(self):
         # Calculate next fibs for descriptors
         num_assets = len(self.global_assets)
-        self.global_assets_level_up = False
-        if num_assets == self.global_assets_next_fib:
-            # n for Fib(n)
-            self.global_assets_next_fib = common.get_next_fibonacci(num_assets)
-            self.global_assets_level_up = True
+        self.global_assets_next_fib = common.get_next_fibonacci(num_assets)
+        self.global_assets_level_up = common.is_fibonacci(num_assets)
 
     # TODO: Make more performant, maybe a map of some sort with a lazy load?
     def asset_relations(self, sibling_name:str):
@@ -94,7 +89,7 @@ class MainSeed(BaseModel):
         """
         sibling_asset = self.global_assets.get(sibling_name)
         if not sibling_asset:
-            raise errors.SeedException(f"Asset {sibling_name} doesn't exist.")
+            raise errors.AssetNotFound(f"Asset {sibling_name} doesn't exist.")
 
         relations = {}
         for asset_name, asset_obj in self.global_assets.items():
@@ -106,6 +101,8 @@ class MainSeed(BaseModel):
             for descriptor_name in asset_obj.descriptors:
                 if descriptor_name in sibling_asset.descriptors:
                     relations[descriptor_name] = asset_obj.name
+                else:
+                    print(f"Descriptor name not found: {descriptor_name}")
 
         return relations
 
@@ -113,10 +110,8 @@ class MainSeed(BaseModel):
         asset_obj = self.global_assets[asset_name]
 
         all_descriptions = []
-        for _desc in asset_obj.descriptors:
-            desc = self.global_descriptors[_desc]
-            print(f"desc: {desc}")
+        for desc_name in asset_obj.descriptors:
+            desc = self.global_descriptors[desc_name]
             all_descriptions.extend(desc.descriptions or [])
 
-        print(f"All descriptions:\n{all_descriptions}")
         return all_descriptions

@@ -37,13 +37,14 @@ class Asset(BaseModel):
         """Re-establish the next_fib value. If the number of descriptors matches a fibonacci number, then
         the next_fib is always the next literal fibonacci number."""
         num_descriptors = len(self.descriptors)
+        
+        # Level is basically the length of the descriptoers == a Fibonacci number
+        self.level_up = common.is_fibonacci(num_descriptors)
         self.next_fib = common.get_next_fibonacci(num_descriptors)
 
     # Only time this occurs is when a Fibonacci number in length occurs
     def is_uneven(self):
-        if common.is_fibonacci(len(self.descriptors)):
-            return False
-        return True
+        return not self.level_up
 
     @property
     def hashtags(self):
