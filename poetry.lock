@@ -506,20 +506,6 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
-name = "semantic-versioning"
-version = "0.1.5"
-description = "A package for easily managing Semantic versions as described in PEP440."
-optional = false
-python-versions = ">=3.10"
-files = [
-    {file = "semantic_versioning-0.1.5-py3-none-any.whl", hash = "sha256:2046c9956a7fc267412289bf99816efefbbd89bcce5e2a5197ef59c1b92ce6c1"},
-    {file = "semantic_versioning-0.1.5.tar.gz", hash = "sha256:323432ec42163385cdb955fbd59c98949ec11e375a852f1c4094873f483f91fb"},
-]
-
-[package.extras]
-dev = ["bandit (==1.7.0)", "black", "flake8", "isort", "pre-commit", "pytest"]
-
-[[package]]
 name = "tomlkit"
 version = "0.13.2"
 description = "Style preserving TOML library"
@@ -544,4 +530,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "3c7b17eb1779691c23e186e4657623b41d0655cf73fad4fb0cae94cc7713d521"
+content-hash = "23e8abeb1a459ad9723f1c00592bb3f14023e22d87eedd4cbe92dd248bea52d9"

@@ -1,9 +1,13 @@
 [tool.poetry]
 name = "seed"
-version = "0.1.1"
+version = "0.1.0"
 description = "Writer helper"
 authors = ["codenomad <codenomad@gmail.com>"]
 readme = "README.md"
+
+[project]
+name = "seed"
+version = "0.0.0"
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -19,12 +23,9 @@ black = "^24.8.0"
 pylint = "^3.2.7"
 
 
-[tool.poetry.group.release.dependencies]
-semantic-versioning = "^0.1.5"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.pyright]
 venvPath = "."
@@ -48,13 +49,15 @@ show_missing = true
 [tool.black]
 line-length = 127
 
-[tool.semantic_release]
-version_toml = ["pyproject.toml:tool.poetry.version"]
-version_variable = ["seed/__init__.py:__version__"]
-version_pattern = ["README.md:rev: v{version}"]
-major_on_zero = false
-force="patch"
-branch = "main"
-upload_to_PyPI = false
-upload_to_release = true
-build_command = "pip install poetry && poetry build"
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "semver"
+tag-branch = "main"
+
+[tool.poetry-dynamic-versioning.files."seed/__init__.py"]
+persistent-substitution = true
+initial-content = """
+  __version__ = "0.0.0"
+  __version_tuple__ = (0, 0, 0)
+"""

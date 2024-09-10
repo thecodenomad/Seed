@@ -42,6 +42,7 @@ jobs:
             - name: Run Black
               run: |
                   poetry run black seed
+                  poetry run pylint seed --ignore=seed/__init__.py
 
             - name: Tests
               run: poetry run pytest -v -s
@@ -52,17 +53,38 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'chore(release):')
         runs-on: ubuntu-latest
         permissions:
-          id-token: write
-          contents: write
+            id-token: write
+            contents: write
         steps:
             - uses: actions/setup-python@v5
 
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                fetch-depth: 0
-                
-            - name: Python Semantic Release
-              uses: python-semantic-release/python-semantic-release@v9.8.8
+                  fetch-depth: 0
+
+            # Install latest version of poetry
+            - name: Install Python Poetry
+              uses: abatilo/actions-poetry@v2.1.0
               with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  poetry-version: 1.8
+
+            - name: Setup poetry to make use of caching
+              shell: bash
+              run: |
+                  poetry config virtualenvs.create true --local
+                  poetry config virtualenvs.in-project true --local
+                  poetry self add "poetry-dynamic-versioning[plugin]"
+
+            - name: Python Semantic Release
+              run: |
+                  # Only files that have version associations
+                  git add pyproject.toml
+                  git add seed/__init__.py
+
+                  git commit -m v$(poetry version -s)
+                  git tag v$(poetry version -s)
+
+                  # Push the version information
+                  git push origin master # Or your current branch
+                  git push origin --tags # Push the tags

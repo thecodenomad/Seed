@@ -1,6 +1,6 @@
 [MASTER]
 jobs=4 #number of processes to use
-ignore=tests
+ignore=tests,__init__.py
 
 [BASIC]
 
