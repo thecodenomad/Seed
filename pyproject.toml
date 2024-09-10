@@ -7,13 +7,13 @@ readme = "README.md"
 
 [project]
 name = "seed"
-version = "0.0.0"
+version = "0.1.1"
 
 [tool.poetry.dependencies]
 python = "^3.12"
 pydantic = "^2.9.0"
 pylint = "^3.2.7"
-
+importlib-metadata = "^8.4.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
@@ -22,10 +22,12 @@ pytest-cov = "^5.0.0"
 black = "^24.8.0"
 pylint = "^3.2.7"
 
+[tool.poetry.group.release.dependencies]
+semantic-versioning = "^0.1.5"
 
 [build-system]
-requires = ["poetry-core", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.pyright]
 venvPath = "."
@@ -48,16 +50,3 @@ show_missing = true
 
 [tool.black]
 line-length = 127
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "semver"
-tag-branch = "main"
-
-[tool.poetry-dynamic-versioning.files."seed/__init__.py"]
-persistent-substitution = true
-initial-content = """
-  __version__ = "0.0.0"
-  __version_tuple__ = (0, 0, 0)
-"""

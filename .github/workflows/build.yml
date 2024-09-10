@@ -39,10 +39,10 @@ jobs:
             - name: Dependency Install
               run: poetry install
 
-            - name: Run Black
+            - name: Run Pylint and Black
               run: |
-                  poetry run black seed
-                  poetry run pylint seed --ignore=seed/__init__.py
+                  poetry run black --check seed
+                  poetry run pylint seed
 
             - name: Tests
               run: poetry run pytest -v -s
@@ -74,13 +74,22 @@ jobs:
               run: |
                   poetry config virtualenvs.create true --local
                   poetry config virtualenvs.in-project true --local
-                  poetry self add "poetry-dynamic-versioning[plugin]"
+
+            - name: Build the package
+              shell: bash
+              run: |
+                  poetry build
+
+            - name: Store the distribution packages
+              uses: actions/upload-artifact@v4
+              with:
+                  name: python-package-distributions
+                  path: dist/
 
             - name: Python Semantic Release
               run: |
                   # Only files that have version associations
                   git add pyproject.toml
-                  git add seed/__init__.py
 
                   git commit -m v$(poetry version -s)
                   git tag v$(poetry version -s)

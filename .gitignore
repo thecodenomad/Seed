@@ -1,3 +1,4 @@
+dist/
 .coverage
 .venv
 *.pyc
