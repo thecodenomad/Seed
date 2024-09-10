@@ -15,7 +15,8 @@ jobs:
             # Setup the specific version of python (this can be matrix-ified)
             - uses: actions/setup-python@v5
               with:
-                  python-version: 3.12
+                  python-version: '3.12'
+                  check-latest: true
 
             # Install latest version of poetry
             - name: Install Python Poetry
@@ -57,6 +58,9 @@ jobs:
             contents: write
         steps:
             - uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+                  check-latest: true
 
             - name: Checkout code
               uses: actions/checkout@v4
