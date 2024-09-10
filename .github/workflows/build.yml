@@ -15,7 +15,7 @@ jobs:
             # Setup the specific version of python (this can be matrix-ified)
             - uses: actions/setup-python@v5
               with:
-                  python-version: '3.12'
+                  python-version: "3.12"
                   check-latest: true
 
             # Install latest version of poetry
@@ -54,12 +54,12 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'chore(release):')
         runs-on: ubuntu-latest
         permissions:
-            id-token: write
             contents: write
+            pull-requests: write
         steps:
             - uses: actions/setup-python@v5
               with:
-                  python-version: '3.12'
+                  python-version: "3.12"
                   check-latest: true
 
             - name: Checkout code
@@ -73,7 +73,13 @@ jobs:
               with:
                   poetry-version: 1.8
 
-            - name: Setup poetry to make use of caching
+            - name: Set Git Credentials
+              shell: bash
+              run: |
+                  git config --local user.email "github-actions[bot]@users.noreply.github.com"
+                  git config --local user.name "github-actions[bot]"
+
+            - name: Setup poetry
               shell: bash
               run: |
                   poetry config virtualenvs.create true --local
