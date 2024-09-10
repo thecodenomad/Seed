@@ -85,9 +85,10 @@ jobs:
                   poetry config virtualenvs.create true --local
                   poetry config virtualenvs.in-project true --local
 
-            - name: Build the package
+            - name: Version and build the package
               shell: bash
               run: |
+                  poetry version patch
                   poetry build
 
             - name: Store the distribution packages
@@ -101,7 +102,7 @@ jobs:
                   # Only files that have version associations
                   git add pyproject.toml
 
-                  git commit -m v$(poetry version -s)
+                  git commit -a -m v$(poetry version -s)
                   git tag v$(poetry version -s)
 
                   # Push the version information
