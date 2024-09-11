@@ -99,7 +99,7 @@ jobs:
                   name: python-package-distributions
                   path: dist/
 
-            # TODO: Skip of tag already exists
+            # TODO: Skip if tag already exists
             - name: Python Semantic Release
               run: |
                   # Only files that have version associations
