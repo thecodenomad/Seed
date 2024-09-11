@@ -2,12 +2,13 @@
 
 from typing import List, Set
 
-from pydantic import BaseModel, field_validator, Field
+from pydantic import field_validator, model_validator, Field
 
 from seed import common, errors
+from seed.models.strict import StrictModel
 
 
-class Descriptor(BaseModel):
+class Descriptor(StrictModel):
     """A descriptor is a a 'hashtag' used for searching related material.
     This type of object can be associated with a character or place.
     """
@@ -35,10 +36,55 @@ class Descriptor(BaseModel):
 
     # pylint: enable=E0213
 
+    @model_validator(mode="after")
+    def validate_and_sanitize(self):
+        """Sanitize the descriptor next_fib and level_up."""
+
+        # Sanitize next_fib if strict = False, fail if mismatch or invalid number
+        try:
+            if self.next_fib != common.get_next_fibonacci(self.num_descriptions):
+                msg = f"Invalid next_fib: {self.next_fib} for {self.num_descriptions} descriptions"
+                raise errors.SeedValidationException(msg)
+        except errors.SeedValidationException:
+            if self.strict:
+                raise
+            self.next_fib = common.get_next_fibonacci(self.num_descriptions)
+
+        # Sanitize level_up if strict = False, fail if invalid
+        try:
+            if self.level_up != (common.is_fibonacci(self.num_descriptions)):
+                msg = f"Invalid level_up: {self.level_up} for len(descriptions: {self.num_descriptions}"
+                raise errors.SeedValidationException(msg)
+        except errors.SeedValidationException:
+            if self.strict:
+                raise
+            self.level_up = common.is_fibonacci(self.num_descriptions)
+
+        # Sanitize name and descriptors
+        # TODO: Can this be done at attribute level?
+        self.name = self.name.lower()
+        self.descriptions = [i.lower() for i in self.descriptions]
+
+        return self
+
+    @property
+    def num_descriptions(self):
+        """The number of descriptions in memory."""
+        return len(self.descriptions)
+
     def add_description(self, description):
         """Add a description to the descriptor."""
 
         # KIS - The description length (number of words) should equal a Fibonacci number
+        #
+        # Why a Fibonacci length check?
+        #
+        # Easily to calculate, easy to teach, symbolic since it felt Natural
+        # (Living organism grow with the golden ratio).
+        #
+        # It takes thought to produce a sentence with a Fibonacci word-length.
+        # The constraints are high enough that rewording is required multiple times as
+        # things get more complex. Its like texts in the late 90s... and you only have 100/month!
         num_words = common.get_num_words(description)
         if not common.is_fibonacci(num_words):
             msg = "Required Fibonacci length for the description"

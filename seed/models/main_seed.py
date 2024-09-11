@@ -4,16 +4,17 @@ assets together."""
 
 from typing import Dict
 
-from pydantic import BaseModel, model_validator
+from pydantic import model_validator
 
 from seed import common, errors
 from seed.models import Asset, Descriptor
+from seed.models.strict import StrictModel
 
 FIB_N_LEVEL = 1
 
 
 # This should be exportable into something consumable by an AI model / Pytorch
-class MainSeed(BaseModel):
+class MainSeed(StrictModel):
     """The Global Seed to be fed into an AI Model."""
 
     global_descriptors: Dict[str, Descriptor] = {}
@@ -27,7 +28,6 @@ class MainSeed(BaseModel):
     # Fix calculations if strict == False, else fail on invalid formatting
     strict: bool = False
 
-    # pylint: disable=E0213
     @model_validator(mode="after")
     def verify_and_sanitize(self):
         """Model Validation method, this will recalculate next_fib and level_up if they appear
@@ -67,8 +67,6 @@ class MainSeed(BaseModel):
 
         return self
 
-    # pylint: enable=E0213
-
     @property
     def num_descriptors(self):
         """Retrieve the number of descriptors currently in memory"""
@@ -107,14 +105,14 @@ class MainSeed(BaseModel):
         if not self.global_assets.get(asset_name):
             asset = Asset(name=asset_name)
             self.global_assets[asset_name] = asset
-        self._set_asset_level()
+        self._set_global_asset_level()
 
     def _ensure_descriptor(self, descriptor_name):
         """Helper method to make sure a desriptor name exists."""
         if not self.global_descriptors.get(descriptor_name):
             desc = Descriptor(name=descriptor_name)
             self.global_descriptors[descriptor_name] = desc
-        self._set_descriptor_level()
+        self._set_global_descriptor_level()
 
     def add_description_to_asset(self, asset_name, descriptor_name, description):
         """Adds a description to an asset."""
@@ -132,21 +130,20 @@ class MainSeed(BaseModel):
         self.add_description(descriptor_name, description)
         self.link_descriptor(asset_name, descriptor_name)
 
-    def _set_descriptor_level(self):
+    def _set_global_descriptor_level(self):
         """Level the global descriptors by checking to see if the list is a Fibonacci number in length"""
         # Calculate next fibs for descriptors
         num_descriptors = len(self.global_descriptors)
         self.global_desc_next_fib = common.get_next_fibonacci(num_descriptors)
         self.global_desc_level_up = common.is_fibonacci(num_descriptors)
 
-    def _set_asset_level(self):
+    def _set_global_asset_level(self):
         """Level the global assets by checking to see if the list is a Fibonacci number in length"""
         # Calculate next fibs for descriptors
         num_assets = len(self.global_assets)
         self.global_assets_next_fib = common.get_next_fibonacci(num_assets)
         self.global_assets_level_up = common.is_fibonacci(num_assets)
 
-    # TODO: Make more performant, maybe a map of some sort with a lazy load?
     def asset_relations(self, sibling_name: str):
         """Determines if an asset relates to another asset via a shared descriptor.
         Args:

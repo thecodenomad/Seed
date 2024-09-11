@@ -4,7 +4,7 @@
             "name": "desc1",
             "next_fib": 1,
             "asset_links": [],
-            "descriptions": ["red"]
+            "descriptions": []
         },
         "desc2": {
             "name": "desc2",
