@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "seed"
-version = "0.1.7"
+version = "0.1.8"
 description = "Writer helper"
 authors = ["codenomad <codenomad@gmail.com>"]
 readme = "README.md"
