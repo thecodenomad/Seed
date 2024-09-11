@@ -1,5 +1,6 @@
 {
     "name": "descriptor",
     "next_fib": 1,
-    "descriptions": []
+    "descriptions": [],
+    "level_up": false
 }

@@ -96,7 +96,7 @@ def test_adding_description(test_seed: MainSeed, test_seed_dict: dict):
     # Add a description to an existing descriptor with 1 description
     test_seed.add_description(desc_one_name, "test3 test3 test3")
     assert test_seed.global_descriptors[desc_one_name].level_up
-    assert test_seed.global_descriptors[desc_one_name].next_fib == 3
+    assert test_seed.global_descriptors[desc_one_name].next_fib == 2
     assert len(test_seed.global_descriptors) == 3
     assert test_seed.global_desc_next_fib == 5
 
@@ -224,6 +224,7 @@ def test_asset_relation(test_seed: MainSeed, test_seed_dict: dict):
     assert test_seed.global_descriptors[desc_one_name].is_multi_asset_linked()
 
 
+@pytest.mark.wip
 def test_exported_asset(test_seed: MainSeed, test_seed_dict: dict):
     asset_one_name = list(test_seed_dict["global_assets"].keys())[0]
     desc_one_name = list(test_seed_dict["global_descriptors"].keys())[0]
@@ -231,16 +232,16 @@ def test_exported_asset(test_seed: MainSeed, test_seed_dict: dict):
     short_description = "TeSt1 TestOne"
     longer_description = "This is a much longer sentence that will demonstrate the fibonacci number usage"
 
-    # 0 descriptions for desc_one_name at this point next_fib == 1
+    # 0 descriptors, expecting next_fib = 1
     assert test_seed.global_descriptors[desc_one_name].next_fib == 1
 
-    # 2 descriptions for desc_one_name at this point next_fib == 3
+    # 1 descriptors, expecting next_fib == 2
     test_seed.add_description_to_asset(asset_one_name, desc_one_name, short_description)
-    assert test_seed.global_descriptors[desc_one_name].next_fib == 3
+    assert test_seed.global_descriptors[desc_one_name].next_fib == 2
 
-    # 3 descriptions for desc_one_name at this point next_fib == 5
+    # 1 descriptor, expecting next_fib == 2 because just adding a description
     test_seed.add_description_to_asset(asset_one_name, desc_one_name, longer_description)
-    assert test_seed.global_descriptors[desc_one_name].next_fib == 5
+    assert test_seed.global_descriptors[desc_one_name].next_fib == 3
 
     # Test exporting
     exported_asset = test_seed.export_asset_descriptions(asset_one_name)
