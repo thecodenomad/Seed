@@ -5,6 +5,10 @@ class SeedException(Exception):
     """Base seed exception"""
 
 
+class SeedValidationException(Exception):
+    """Validation exception"""
+
+
 class AssetNotFound(SeedException):
     """Occurs when an Asset doesn't exist in memory"""
 

@@ -19,7 +19,7 @@
             "descriptions": ["blue flag"]
         }
     },
-    "global_desc_level_up": false,
+    "global_desc_level_up": true,
     "global_desc_next_fib": 5,
     "global_assets": {
         "character1": {
@@ -33,6 +33,6 @@
             "descriptors": []
         }
     },
-    "global_assets_level_up": false,
+    "global_assets_level_up": true,
     "global_assets_next_fib": 3
 }

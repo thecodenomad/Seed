@@ -1,0 +1,15 @@
+{
+    "global_descriptors": {
+        "desc1": {
+            "name": "desc1",
+            "next_fib": 4,
+            "asset_links": [],
+            "descriptions": ["red"]
+        }
+    },
+    "global_desc_level_up": true,
+    "global_desc_next_fib": 4,
+    "global_assets": {},
+    "global_assets_level_up": false,
+    "global_assets_next_fib": 1
+}

@@ -1,5 +1,6 @@
 import json
 import pytest
+import random
 
 from pydantic_core import from_json
 from seed.models.main_seed import MainSeed
@@ -17,6 +18,34 @@ def test_seed_dict(basic_json):
 @pytest.fixture(scope="function")
 def test_seed(basic_json):
     yield MainSeed.model_validate_json(basic_json)
+
+
+@pytest.fixture(scope="function")
+def strict_invalid_desc_next_fib_json(invalid_desc_next_fib_json):
+    json_obj = json.loads(invalid_desc_next_fib_json)
+    json_obj["strict"] = True
+    yield json.dumps(json_obj)
+
+
+@pytest.fixture(scope="function")
+def strict_invalid_assets_next_fib_json(invalid_assets_next_fib_json):
+    json_obj = json.loads(invalid_assets_next_fib_json)
+    json_obj["strict"] = True
+    yield json.dumps(json_obj)
+
+
+@pytest.fixture(scope="function")
+def strict_invalid_desc_level_up_json(invalid_desc_level_up_json):
+    json_obj = json.loads(invalid_desc_level_up_json)
+    json_obj["strict"] = True
+    yield json.dumps(json_obj)
+
+
+@pytest.fixture(scope="function")
+def strict_invalid_assets_level_up_json(invalid_assets_level_up_json):
+    json_obj = json.loads(invalid_assets_level_up_json)
+    json_obj["strict"] = True
+    yield json.dumps(json_obj)
 
 
 def test_adding_assets(test_seed_dict: dict):
@@ -242,3 +271,78 @@ def test_invalid_description(test_seed: MainSeed):
 
     with pytest.raises(errors.FailedDescriptionLength):
         test_seed.add_description_to_asset(asset_name=asset_name, descriptor_name=descriptor_name, description=description)
+
+
+def test_export_to_json():
+    # Create Brand New Seed Object
+    test_seed = MainSeed()
+
+    # Everything added to the Seed should be using the .lower mechanism, expose if not
+    assets = ["assetOne", "AssetTwo", "ASSETTHREE", "Asset4", "5"]
+    descriptors = ["descOne", "DESCTwo", "desc3", "DescFour"]
+    valid_descriptions = ["blue", "blue hair", "blue haired woman", "blue haired woman in bar"]
+    asset = assets[0].lower()
+    descriptor = descriptors[0].lower()
+
+    # Add a new asset, a new descriptor and randomize the number of valid descriptions to add
+    rand_desc_number = random.randint(1, len(valid_descriptions))
+    for i in range(rand_desc_number):
+        test_seed.add_description_to_asset(assets[0], descriptors[0], valid_descriptions[i])
+
+    # Export and load as dictionary
+    exported_json = test_seed.model_dump_json()
+    to_validate_obj = json.loads(exported_json)
+
+    # Validate Case Insensitivity
+    assert not to_validate_obj["global_descriptors"].get(descriptors[0])
+
+    # 2 descriptors
+    assert len(to_validate_obj["global_descriptors"]) == 1
+    assert to_validate_obj["global_desc_level_up"]
+    assert to_validate_obj["global_desc_next_fib"] == 2
+
+    # 2 asset
+    assert len(to_validate_obj["global_assets"]) == 1
+    assert to_validate_obj["global_assets_level_up"]
+    assert to_validate_obj["global_assets_next_fib"] == 2
+
+    # rand_desc_numbers - descriptions
+    assert len(to_validate_obj["global_descriptors"][descriptor.lower()]["descriptions"]) == rand_desc_number
+    assert to_validate_obj["global_descriptors"][descriptor.lower()]["next_fib"] == common.get_next_fibonacci(rand_desc_number)
+    assert to_validate_obj["global_descriptors"][descriptor.lower()]["level_up"] == common.is_fibonacci(rand_desc_number)
+
+
+def test_strict_invalid_desc(strict_invalid_desc_next_fib_json, strict_invalid_desc_level_up_json):
+    # Test Descriptor next_fib
+    with pytest.raises(errors.SeedValidationException):
+        MainSeed.model_validate_json(strict_invalid_desc_next_fib_json)
+
+    # Test Descriptor level_up
+    with pytest.raises(errors.SeedValidationException):
+        MainSeed.model_validate_json(strict_invalid_desc_level_up_json)
+
+
+def test_strict_invalid_assets(strict_invalid_assets_next_fib_json, strict_invalid_assets_level_up_json):
+    # Test Assets next_fib
+    with pytest.raises(errors.SeedValidationException):
+        MainSeed.model_validate_json(strict_invalid_assets_next_fib_json)
+
+    # Test Assets level_up
+    with pytest.raises(errors.SeedValidationException):
+        MainSeed.model_validate_json(strict_invalid_assets_level_up_json)
+
+
+def test_invalid_desc(invalid_desc_next_fib_json, invalid_desc_level_up_json):
+    # Test Descriptor next fib
+    MainSeed.model_validate_json(invalid_desc_next_fib_json)
+
+    # Test Descriptor level up
+    MainSeed.model_validate_json(invalid_desc_level_up_json)
+
+
+def test_invalid_assets(invalid_assets_next_fib_json, invalid_assets_level_up_json):
+    # Test Assets next fib
+    MainSeed.model_validate_json(invalid_assets_next_fib_json)
+
+    # Test Assets level up
+    MainSeed.model_validate_json(invalid_assets_level_up_json)

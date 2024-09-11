@@ -4,7 +4,7 @@ assets together."""
 
 from typing import Dict
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from seed import common, errors
 from seed.models import Asset, Descriptor
@@ -23,6 +23,61 @@ class MainSeed(BaseModel):
     global_assets: Dict[str, Asset] = {}
     global_assets_level_up: bool = False
     global_assets_next_fib: int = FIB_N_LEVEL
+
+    # Fix calculations if strict == False, else fail on invalid formatting
+    strict: bool = False
+
+    # pylint: disable=E0213
+    @model_validator(mode="after")
+    def verify_and_sanitize(self):
+        """Model Validation method, this will recalculate next_fib and level_up if they appear
+        to be invalid.
+        """
+        # Sanitize next_fib if strict = False, fail if mismatch or invalid number
+        try:
+            if self.global_desc_next_fib != common.get_next_fibonacci(self.num_descriptors):
+                msg = f"Invalid global_desc_next_fib: {self.global_desc_next_fib} for {self.num_descriptors} descriptors"
+                raise errors.SeedValidationException(msg)
+
+            if self.global_assets_next_fib != common.get_next_fibonacci(self.num_assets):
+                msg = f"Invalid global_assets_next_fib: {self.global_assets_next_fib} for {self.num_assets} assets"
+                raise errors.SeedValidationException(msg)
+
+        except errors.SeedValidationException:
+            if self.strict:
+                raise
+            self.global_desc_next_fib = common.get_next_fibonacci(self.num_descriptors)
+            self.global_assets_next_fib = common.get_next_fibonacci(self.num_assets)
+
+        # Sanitize level_up if strict = False, fail if invalid
+        try:
+            if self.global_desc_level_up != (common.is_fibonacci(self.num_descriptors)):
+                msg = f"Invalid global_desc_level_up: {self.global_desc_level_up} for len(descriptors): {self.num_descriptors}"
+                raise errors.SeedValidationException(msg)
+
+            if self.global_assets_level_up != (common.is_fibonacci(self.num_assets)):
+                msg = f"Invalid global_assets_level_up: {self.global_assets_level_up} for len(assets): {self.num_assets}"
+                raise errors.SeedValidationException(msg)
+
+        except errors.SeedValidationException:
+            if self.strict:
+                raise
+            self.global_desc_level_up = common.is_fibonacci(self.num_descriptors)
+            self.global_assets_level_up = common.is_fibonacci(self.num_assets)
+
+        return self
+
+    # pylint: enable=E0213
+
+    @property
+    def num_descriptors(self):
+        """Retrieve the number of descriptors currently in memory"""
+        return len(self.global_descriptors)
+
+    @property
+    def num_assets(self):
+        """Retrieve the number of assets currently in memory"""
+        return len(self.global_assets)
 
     def link_descriptor(self, asset_name, descriptor_name):
         """Link a descriptor to an asset"""

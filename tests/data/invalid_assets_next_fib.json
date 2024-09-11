@@ -1,0 +1,19 @@
+{
+    "global_descriptors": {},
+    "global_desc_level_up": false,
+    "global_desc_next_fib": 1,
+    "global_assets": {
+        "character1": {
+            "name": "character1",
+            "next_fib": 1,
+            "descriptors": []
+        },
+        "setting1": {
+            "name": "setting1",
+            "next_fib": 1,
+            "descriptors": []
+        }
+    },
+    "global_assets_level_up": true,
+    "global_assets_next_fib": 4
+}
