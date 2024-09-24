@@ -7,9 +7,13 @@ on:
 
 jobs:
     Quality:
-        # runs-on: ubuntu-latest
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
+        #runs-on: self-hosted
         steps:
+            - name: Install Dependencies
+              run: |
+	          sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0
+
             # Checkout the code from this repo
             - uses: actions/checkout@v4
 
@@ -53,12 +57,16 @@ jobs:
         needs: Quality
         # https://github.community/t/how-do-i-specify-job-dependency-running-in-another-workflow/16482
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'chore(release):')
-        # runs-on: ubuntu-latest
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
+        #runs-on: self-hosted
         permissions:
             contents: write
             pull-requests: write
         steps:
+            - name: Install Dependencies
+              run: |
+	          sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0
+
             - uses: actions/setup-python@v5
               with:
                   python-version: "3.12"
