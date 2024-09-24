@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/thecodenomad/seeds">
+    <file preprocess="xml-stripblanks">window.ui</file>
+    <!-- other ui files
+    <file>icons/symbolic/apps/chat-bubble-empty-symbolic.svg</file>
+    <file>icons/symbolic/apps/sprout-symbolic.svg</file> -->
+  </gresource>
+</gresources>
