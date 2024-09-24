@@ -25,9 +25,10 @@
 from gi.repository import Adw
 from gi.repository import Gtk
 
-@Gtk.Template(resource_path='/org/thecodenomad/seeds/window.ui')
+
+@Gtk.Template(resource_path="/org/thecodenomad/seeds/window.ui")
 class SeedsWindow(Adw.ApplicationWindow):
-    __gtype_name__ = 'SeedsWindow'
+    __gtype_name__ = "SeedsWindow"
 
     label = Gtk.Template.Child()
 

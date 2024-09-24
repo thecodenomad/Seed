@@ -43,8 +43,8 @@ jobs:
 
             - name: Run Pylint and Black
               run: |
-                  poetry run black --check seed
-                  poetry run pylint seed
+                  poetry run black --check src/seed
+                  poetry run pylint src/seed
 
             - name: Tests
               run: poetry run pytest -v -s

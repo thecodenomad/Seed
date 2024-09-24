@@ -25,8 +25,8 @@
 import sys
 import gi
 
-gi.require_version('Gtk', '4.0')
-gi.require_version('Adw', '1')
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
 from gi.repository import Gtk, Gio, Adw
 from .window import SeedsWindow
@@ -36,11 +36,10 @@ class SeedsApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='org.thecodenomad.seeds',
-                         flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
-        self.create_action('quit', lambda *_: self.quit(), ['<primary>q'])
-        self.create_action('about', self.on_about_action)
-        self.create_action('preferences', self.on_preferences_action)
+        super().__init__(application_id="org.thecodenomad.seeds", flags=Gio.ApplicationFlags.DEFAULT_FLAGS)
+        self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
+        self.create_action("about", self.on_about_action)
+        self.create_action("preferences", self.on_preferences_action)
 
     def do_activate(self):
         """Called when the application is activated.
@@ -55,18 +54,20 @@ class SeedsApplication(Adw.Application):
 
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
-        about = Adw.AboutWindow(transient_for=self.props.active_window,
-                                application_name='seeds',
-                                application_icon='org.thecodenomad.seeds',
-                                developer_name='Ray',
-                                version='0.1.0',
-                                developers=['Ray'],
-                                copyright='© 2024 Ray')
+        about = Adw.AboutWindow(
+            transient_for=self.props.active_window,
+            application_name="seeds",
+            application_icon="org.thecodenomad.seeds",
+            developer_name="Ray",
+            version="0.1.0",
+            developers=["Ray"],
+            copyright="© 2024 Ray",
+        )
         about.present()
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
-        print('app.preferences action activated')
+        print("app.preferences action activated")
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.
