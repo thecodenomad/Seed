@@ -10,12 +10,12 @@ jobs:
         runs-on: ubuntu-latest
         #runs-on: self-hosted
         steps:
+            # Checkout the code from this repo
+            - uses: actions/checkout@v4
+
             - name: Install Dependencies
               run: |
 	          sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-4.0
-
-            # Checkout the code from this repo
-            - uses: actions/checkout@v4
 
             # Setup the specific version of python (this can be matrix-ified)
             - uses: actions/setup-python@v5
@@ -30,7 +30,6 @@ jobs:
                   poetry-version: 1.8
 
             - name: Setup poetry to make use of caching
-              shell: bash
               run: |
                   poetry config virtualenvs.create true --local
                   poetry config virtualenvs.in-project true --local
