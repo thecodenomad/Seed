@@ -1,0 +1,6 @@
+data/org.thecodenomad.seeds.desktop.in
+data/org.thecodenomad.seeds.metainfo.xml.in
+data/org.thecodenomad.seeds.gschema.xml
+src/main.py
+src/window.py
+src/window.ui

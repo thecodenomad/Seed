@@ -1,8 +1,8 @@
 using Gtk 4.0;
 using Adw 1;
 
-Adw.Window {
-  title: _("AdwViewSwitcher Demo");
+template SeedsWindow: Adw.ApplicationWindow {
+  title: _("Seeds");
   width-request: 360;
   height-request: 360;
 
@@ -51,6 +51,7 @@ Adw.Window {
               label: _("Human Interface Guidelines");
               uri: "https://developer.gnome.org/hig/patterns/nav/view-switchers.html";
             }
+
           };
         };
       }
@@ -69,6 +70,7 @@ Adw.Window {
             orientation: vertical;
             valign: center;
 
+/*
             LinkButton {
               label: _("API Reference");
               uri: "https://gnome.pages.gitlab.gnome.org/libadwaita/doc/1.5/class.ViewSwitcher.html";
@@ -78,6 +80,7 @@ Adw.Window {
               label: _("Human Interface Guidelines");
               uri: "https://developer.gnome.org/hig/patterns/nav/view-switchers.html";
             }
+*/
           };
         };
       }
